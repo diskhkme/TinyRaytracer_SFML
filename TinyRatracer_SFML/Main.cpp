@@ -4,6 +4,8 @@
 #include <SFML/Graphics.hpp>
 
 #include "Geometry.h"
+#include "Renderer.h"
+#include "Sphere.h"
 
 inline sf::Uint8 ConvertFloatToColor(float val)
 {
@@ -25,10 +27,11 @@ void ConvertPixelsFromVector(const std::vector<Vec3f>& framebuffer, sf::Uint8* p
 
 int main()
 {
-	constexpr int WIDTH = 800;
-	constexpr int HEIGHT = 600;
+	constexpr unsigned int WIDTH = 800;
+	constexpr unsigned int HEIGHT = 600;
+	constexpr float FOV = 3.14f / 2.f;
 	
-	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "SFML works!");
+	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Tiny Ray tracer");
 	window.setVerticalSyncEnabled(true);
 
 	sf::Texture targetTexture;
@@ -40,24 +43,26 @@ int main()
 	std::vector<Vec3f> framebuffer(WIDTH * HEIGHT);
 	sf::Uint8* pixels = new sf::Uint8[WIDTH * HEIGHT * 4];
 
+	
+	Renderer renderer = Renderer{ WIDTH, HEIGHT, FOV };
+
+	//---Scene 정의
+	Sphere sphere{ Vec3f(0,0,-5),1.f };
+
+	//---Render
 	sf::Clock clock;
-	for (size_t j = 0; j < HEIGHT; j++)
-	{
-		for (size_t i = 0; i < WIDTH; i++)
-		{
-			framebuffer[i + j * WIDTH] = Vec3f(j / float(HEIGHT), i / float(WIDTH), 0);
-		}
-	}
+	renderer.Render(framebuffer, sphere);
 	sf::Int32 elapsedTime = clock.getElapsedTime().asMilliseconds();
 	window.setTitle(sf::String{ std::to_string(elapsedTime) + " ms" });
 
-
+	//---Texture Update
 	ConvertPixelsFromVector(framebuffer, pixels);
 	targetTexture.update(pixels);
 
 	sf::Sprite sprite;
 	sprite.setTexture(targetTexture);
 
+	//---Display
 	while (window.isOpen())
 	{
 		sf::Event event;
