@@ -1,7 +1,8 @@
 #include "Renderer.h"
 
 Renderer::Renderer(unsigned int w, unsigned int h, float fov)
-	:width{ w }, height{ h }, fov{ fov }
+	:width{ w }, height{ h }, fov{ fov },
+	mCameraPosition{0.0f,0.0f,0.0f}
 {
 }
 
@@ -15,7 +16,7 @@ void Renderer::Render(std::vector<Vec3f>& frameBuffer, const Sphere & sphere)
 			float x = (2 * (i + 0.5f) / (float)width - 1) * tan(fov / 2.0f)*width / (float)height;
 			float y = -(2 * (j + 0.5f) / (float)height - 1) * tan(fov / 2.0f);
 			Vec3f dir = Vec3f(x, y, -1).normalize();
-			frameBuffer[i + j * width] = CastRay(Vec3f(0, 0, 0), dir, sphere); //카메라는 0,0,0에 위치
+			frameBuffer[i + j * width] = CastRay(mCameraPosition, dir, sphere); //카메라는 0,0,0에 위치
 		}
 	}
 }
@@ -28,4 +29,9 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, const Sph
 		return Vec3f(0.2f, 0.7f, 0.8f); // Not intersect
 	}
 	return Vec3f(0.4f, 0.4f, 0.3f); // Intersect
+}
+
+void Renderer::UpdateCamPosition(float dt, Vec3f dir)
+{
+	mCameraPosition = mCameraPosition + dir * dt;
 }
