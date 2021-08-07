@@ -9,6 +9,7 @@ class Window : public sf::NonCopyable
 public:
 	Window(unsigned int width, unsigned int height, float fov);
 	~Window();
+	void AddSphere(const Sphere& s);
 	void Run();
 
 private:
@@ -37,7 +38,7 @@ private:
 	sf::Uint8* mPixels;
 
 	// Scene 
-	Sphere mSphere = Sphere{ Vec3f(0,0,-5),1.f };
+	std::vector<Sphere> mScene;
 
 	// Simple Camera Moving from Input WASD
 	bool mIsMovingForward;

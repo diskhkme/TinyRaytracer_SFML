@@ -8,6 +8,7 @@ Window::Window(unsigned int width, unsigned int height, float fov)
 	mRenderer{width, height, fov},
 	mFramebuffer{width*height},
 	mDisplayTexture{}, mDisplaySprite{},
+	mScene{},
 	mFont{}, mStatisticsText{}, mStatisticsUpdateTime{},
 	mStatisticsNumFrames{ 0 }
 {
@@ -22,12 +23,21 @@ Window::Window(unsigned int width, unsigned int height, float fov)
 		assert(1);
 	}
 
+	mDisplayTexture.setSmooth(true);
+
 	mPixels = new sf::Uint8[width * height * 4];
+
+	mDisplaySprite.setTexture(mDisplayTexture);
 }
 
 Window::~Window()
 {
 	delete mPixels;
+}
+
+void Window::AddSphere(const Sphere & s)
+{
+	mScene.emplace_back(s);
 }
 
 void Window::Run()
@@ -97,10 +107,10 @@ void Window::Render()
 {
 	mWindow.clear();
 
-	mRenderer.Render(mFramebuffer, mSphere);
+	mRenderer.Render(mFramebuffer, mScene);
 	Utility::ConvertPixelsFromVector(mFramebuffer, mPixels);
 	mDisplayTexture.update(mPixels);
-	mDisplaySprite.setTexture(mDisplayTexture);
+	
 
 	mWindow.draw(mDisplaySprite);
 	mWindow.draw(mStatisticsText);

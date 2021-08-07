@@ -6,7 +6,7 @@ Renderer::Renderer(unsigned int w, unsigned int h, float fov)
 {
 }
 
-void Renderer::Render(std::vector<Vec3f>& frameBuffer, const Sphere & sphere)
+void Renderer::Render(std::vector<Vec3f>& frameBuffer, const std::vector<Sphere>& scene)
 {
 	// 현재는 Scene에 Sphere 하나만 있다고 가정
 
@@ -16,19 +16,30 @@ void Renderer::Render(std::vector<Vec3f>& frameBuffer, const Sphere & sphere)
 			float x = (2 * (i + 0.5f) / (float)width - 1) * tan(fov / 2.0f)*width / (float)height;
 			float y = -(2 * (j + 0.5f) / (float)height - 1) * tan(fov / 2.0f);
 			Vec3f dir = Vec3f(x, y, -1).normalize();
-			frameBuffer[i + j * width] = CastRay(mCameraPosition, dir, sphere); //카메라는 0,0,0에 위치
+			frameBuffer[i + j * width] = CastRay(mCameraPosition, dir, scene); //카메라는 0,0,0에 위치
 		}
 	}
 }
 
-Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, const Sphere& sphere)
+Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, const std::vector<Sphere>& scene)
 {
 	float sphereDist = std::numeric_limits<float>::max();
-	if (!sphere.rayIntersect(origin, direction, sphereDist))
+
+	Vec3f fillColor{};
+	bool filled = false;
+	for (const Sphere& s : scene)
 	{
-		return Vec3f(0.2f, 0.7f, 0.8f); // Not intersect
+		if (s.rayIntersect(origin, direction, sphereDist))
+		{
+			fillColor = s.GetColor();
+			filled = true;
+		}
 	}
-	return Vec3f(0.4f, 0.4f, 0.3f); // Intersect
+
+	if (!filled)
+		return Vec3f(0.2f, 0.7f, 0.8f); // Not intersect
+	else
+		return fillColor; // Intersect, closest
 }
 
 void Renderer::UpdateCamPosition(float dt, Vec3f dir)
