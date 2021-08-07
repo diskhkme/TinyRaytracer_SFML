@@ -1,10 +1,33 @@
+#include <cassert>
+#include <algorithm>
+
 #include <SFML/Graphics.hpp>
+
+#include "Geometry.h"
+
+inline sf::Uint8 ConvertFloatToColor(float val)
+{
+	return (val >= 0.0f) ? static_cast<sf::Uint8>(val*255.0f) : 0;
+}
+
+void ConvertPixelsFromVector(const std::vector<Vec3f>& framebuffer, sf::Uint8* pixels)
+{
+	size_t pixelCount = framebuffer.size();
+
+	for (size_t i = 0; i < pixelCount; i++)
+	{
+		pixels[4 * i + 0] = ConvertFloatToColor(framebuffer[i].x);
+		pixels[4 * i + 1] = ConvertFloatToColor(framebuffer[i].y);
+		pixels[4 * i + 2] = ConvertFloatToColor(framebuffer[i].z);
+		pixels[4 * i + 3] = 255;
+	}
+}
 
 int main()
 {
-	constexpr int WIDTH = 1024;
-	constexpr int HEIGHT = 768;
-
+	constexpr int WIDTH = 800;
+	constexpr int HEIGHT = 600;
+	
 	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "SFML works!");
 	window.setVerticalSyncEnabled(true);
 
@@ -14,6 +37,7 @@ int main()
 		return -1;
 	}
 
+	std::vector<Vec3f> framebuffer(WIDTH * HEIGHT);
 	sf::Uint8* pixels = new sf::Uint8[WIDTH * HEIGHT * 4];
 
 	sf::Clock clock;
@@ -21,16 +45,14 @@ int main()
 	{
 		for (size_t i = 0; i < WIDTH; i++)
 		{
-			pixels[(i + j * WIDTH) * 4 + 0] = static_cast<sf::Uint8>((j / float(HEIGHT))*255); // R Channel
-			pixels[(i + j * WIDTH) * 4 + 1] = static_cast<sf::Uint8>((i / float(WIDTH))*255); // G Channel
-			pixels[(i + j * WIDTH) * 4 + 2] = 0; // B Channel
-			pixels[(i + j * WIDTH) * 4 + 3] = 255; // A Channel
+			framebuffer[i + j * WIDTH] = Vec3f(j / float(HEIGHT), i / float(WIDTH), 0);
 		}
 	}
 	sf::Int32 elapsedTime = clock.getElapsedTime().asMilliseconds();
 	window.setTitle(sf::String{ std::to_string(elapsedTime) + " ms" });
 
 
+	ConvertPixelsFromVector(framebuffer, pixels);
 	targetTexture.update(pixels);
 
 	sf::Sprite sprite;
@@ -50,5 +72,6 @@ int main()
 		window.display();
 	}
 
+	delete pixels;
 	return 0;
 }
