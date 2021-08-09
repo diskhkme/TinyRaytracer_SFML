@@ -25,7 +25,38 @@ void Renderer::Render(std::vector<Vec3f>& frameBuffer, const std::vector<Sphere>
 }
 
 Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, 
-	const std::vector<Sphere>& scene, const std::vector<Light>& lights) const
+	const std::vector<Sphere>& scene, const std::vector<Light>& lights)
+{
+	Vec3f hit, normal;
+	Material material;
+	
+	if(!SceneIntersect(origin, direction, scene, hit, normal, material))
+	{ 
+		return Vec3f{ 0.2f, 0.7f, 0.8f };
+	}
+	// 교차하는 물체가 있는경우 hit,normal,material 정보가 저장됨
+
+	float diffuseIntensity = 0;
+	float specularIntensity = 0;
+	
+	for (const Light& light : lights)
+	{
+		Vec3f lightDir = (light.GetPosition() - hit).normalize();
+
+		diffuseIntensity += light.GetIntensity() * std::max(0.0f, lightDir*normal);
+		specularIntensity += std::powf(std::max(0.0f, Reflect(lightDir, normal)*direction), material.GetSpecularExponent())
+							*light.GetIntensity();
+	}
+
+	Vec2f materialAlbedo = material.GetAlbedo();
+	Vec3f color = material.GetDiffuseColor() * diffuseIntensity * materialAlbedo[0] // diffuse term
+		+ Vec3f{ 1.0f, 1.0f, 1.0f }*specularIntensity * materialAlbedo[1]; // specular term
+	Utility::SaturateColor(color);
+	return color;
+}
+
+bool Renderer::SceneIntersect(const Vec3f & origin, const Vec3f direction, const std::vector<Sphere>& scene, 
+	Vec3f & hit, Vec3f & normal, Material & material)
 {
 	float sphereDist = std::numeric_limits<float>::max();
 
@@ -35,30 +66,18 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction,
 	{
 		if (s.RayIntersect(origin, direction, sphereDist))
 		{
-			Vec3f point = origin + direction * sphereDist;
-			// point-s.GetCenter() = normal direction of sphere
-			float diffuseIntensity = CalculateLighting(lights, point, (point - s.GetCenter()).normalize()); 
-			fillColor = s.GetColor() * diffuseIntensity;
-			Utility::SaturateColor(fillColor);
-			filled = true;
+			hit = origin + direction * sphereDist;
+			normal = (hit - s.GetCenter()).normalize();
+			material = s.GetMaterial();
 		}
 	}
 
-	if (!filled)
-		return Vec3f(0.2f, 0.7f, 0.8f); // Not intersect
-	else
-		return fillColor; // Intersect, closest
+	return sphereDist < 1000; // 최대 거리. Camera의 far plane이면 적절하겠죠?
 }
 
-float Renderer::CalculateLighting(const std::vector<Light>& lights, const Vec3f & point, const Vec3f & normal) const
+Vec3f Renderer::Reflect(const Vec3f & l, const Vec3f & n) const
 {
-	float diffuseIntensity = 0;
-	for (const Light& light : lights) //scene의 모든 light에 대해
-	{
-		Vec3f lightDir = (light.GetPosition() - point).normalize(); //point와 빛의 방향으로,
-		diffuseIntensity += light.GetIntensity() * std::max(0.f, lightDir*normal); // dot(n,l)의 결과를 누적
-	}
-	return diffuseIntensity; //현재는 light color가 없으므로 intensity만 return
+	return l - n * 2.0f*(n*l);
 }
 
 

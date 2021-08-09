@@ -129,10 +129,10 @@ void Window::UpdateStatistics(sf::Time elapsedTime)
 
 	if (mStatisticsUpdateTime >= sf::seconds(1.0f))
 	{
-		sf::Int64 averageTimePerUpdate = mStatisticsUpdateTime.asMicroseconds() / mStatisticsNumFrames;
+		sf::Int64 averageTimePerUpdate = mStatisticsUpdateTime.asMilliseconds() / mStatisticsNumFrames;
 		mStatisticsText.setString(
 			"Frames / Second = " + std::to_string(mStatisticsNumFrames) + "\n" +
-			"Time / Update = " + std::to_string(averageTimePerUpdate) + "us");
+			"Time / Update = " + std::to_string(averageTimePerUpdate) + "ms");
 
 		mStatisticsUpdateTime -= sf::seconds(1.0f);
 		mStatisticsNumFrames = 0;

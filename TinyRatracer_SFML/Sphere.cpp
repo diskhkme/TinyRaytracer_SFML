@@ -1,7 +1,7 @@
 ﻿#include "Sphere.h"
 
-Sphere::Sphere(const Vec3f& c, const float& r, const Vec3f& color)
-	: center{ c }, radius{ r }, color{ color }
+Sphere::Sphere(const Vec3f& c, const float& r, const Material& m)
+	: center{ c }, radius{ r }, material{ m }
 {
 
 }

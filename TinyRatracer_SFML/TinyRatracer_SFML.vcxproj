@@ -162,6 +162,7 @@
   <ItemGroup>
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Sphere.h" />
