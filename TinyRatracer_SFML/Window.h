@@ -10,6 +10,7 @@ public:
 	Window(unsigned int width, unsigned int height, float fov);
 	~Window();
 	void AddSphere(const Sphere& s);
+	void AddLight(const Light& l);
 	void Run();
 
 private:
@@ -39,6 +40,7 @@ private:
 
 	// Scene 
 	std::vector<Sphere> mScene;
+	std::vector<Light> mLight;
 
 	// Simple Camera Moving from Input WASD
 	bool mIsMovingForward;

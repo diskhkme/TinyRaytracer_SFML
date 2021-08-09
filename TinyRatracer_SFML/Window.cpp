@@ -17,7 +17,7 @@ Window::Window(unsigned int width, unsigned int height, float fov)
 	mStatisticsText.setPosition(5.f, 5.f);
 	mStatisticsText.setCharacterSize(10);
 
-	if (mDisplayTexture.create(width, height))
+	if (!mDisplayTexture.create(width, height))
 	{
 		std::cout << "Display Texture Initialization Failed!!" << std::endl;
 		assert(1);
@@ -38,6 +38,11 @@ Window::~Window()
 void Window::AddSphere(const Sphere & s)
 {
 	mScene.emplace_back(s);
+}
+
+void Window::AddLight(const Light & l)
+{
+	mLight.emplace_back(l);
 }
 
 void Window::Run()
@@ -107,7 +112,7 @@ void Window::Render()
 {
 	mWindow.clear();
 
-	mRenderer.Render(mFramebuffer, mScene);
+	mRenderer.Render(mFramebuffer, mScene, mLight);
 	Utility::ConvertPixelsFromVector(mFramebuffer, mPixels);
 	mDisplayTexture.update(mPixels);
 	

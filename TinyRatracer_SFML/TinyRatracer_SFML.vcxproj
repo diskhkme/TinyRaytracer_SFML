@@ -156,10 +156,12 @@
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Geometry.h" />
+    <ClInclude Include="Light.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Sphere.h" />
