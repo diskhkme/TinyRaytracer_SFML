@@ -2,6 +2,7 @@
 
 #include "Geometry.h"
 #include "Material.h"
+#include <iostream>
 
 class Sphere
 {
@@ -17,8 +18,6 @@ public:
 	bool RayIntersect(const Vec3f& orig, const Vec3f& dir, float& closest) const;
 	
 public:
-	inline Vec3f GetCenter() const { return center; }
-	inline Material GetMaterial() const { return material; }
-
-
+	inline const Vec3f& GetCenter() const { return center; }
+	inline const Material& GetMaterial() const { return material; }
 };

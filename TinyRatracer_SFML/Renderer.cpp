@@ -2,6 +2,7 @@
 #include "Utility.h"
 
 #include <algorithm>
+#include <vector>
 
 Renderer::Renderer(unsigned int w, unsigned int h, float fov)
 	:width{ w }, height{ h }, fov{ fov },
@@ -9,7 +10,12 @@ Renderer::Renderer(unsigned int w, unsigned int h, float fov)
 {
 }
 
-void Renderer::Render(std::vector<Vec3f>& frameBuffer, const std::vector<Sphere>& scene, const std::vector<Light>& lights)
+void Renderer::SetScene(const Scene & scene)
+{
+	mScene = scene;
+}
+
+void Renderer::Render(std::vector<Vec3f>& frameBuffer)
 {
 	// 현재는 Scene에 Sphere 하나만 있다고 가정
 
@@ -19,18 +25,17 @@ void Renderer::Render(std::vector<Vec3f>& frameBuffer, const std::vector<Sphere>
 			float x = (2 * (i + 0.5f) / (float)width - 1) * tan(fov / 2.0f)*width / (float)height;
 			float y = -(2 * (j + 0.5f) / (float)height - 1) * tan(fov / 2.0f);
 			Vec3f dir = Vec3f(x, y, -1).normalize();
-			frameBuffer[i + j * width] = CastRay(mCameraPosition, dir, scene, lights); //카메라는 0,0,0에 위치
+			frameBuffer[i + j * width] = CastRay(mCameraPosition, dir); //카메라는 0,0,0에 위치
 		}
 	}
 }
 
-Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, 
-	const std::vector<Sphere>& scene, const std::vector<Light>& lights)
+Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction)
 {
 	Vec3f hit, normal;
 	Material material;
 	
-	if(!SceneIntersect(origin, direction, scene, hit, normal, material))
+	if(!SceneIntersect(origin, direction, hit, normal, material))
 	{ 
 		return Vec3f{ 0.2f, 0.7f, 0.8f };
 	}
@@ -39,7 +44,8 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction,
 	float diffuseIntensity = 0;
 	float specularIntensity = 0;
 	
-	for (const Light& light : lights)
+	// Right side evaluated once
+	for (const Light& light : mScene.GetLights())
 	{
 		Vec3f lightDir = (light.GetPosition() - hit).normalize();
 
@@ -55,14 +61,16 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction,
 	return color;
 }
 
-bool Renderer::SceneIntersect(const Vec3f & origin, const Vec3f direction, const std::vector<Sphere>& scene, 
+bool Renderer::SceneIntersect(const Vec3f & origin, const Vec3f direction,
 	Vec3f & hit, Vec3f & normal, Material & material)
 {
 	float sphereDist = std::numeric_limits<float>::max();
 
 	Vec3f fillColor{};
 	bool filled = false;
-	for (const Sphere& s : scene)
+
+	// Right side evaluated once
+	for (const Sphere& s : mScene.GetObjects())
 	{
 		if (s.RayIntersect(origin, direction, sphereDist))
 		{

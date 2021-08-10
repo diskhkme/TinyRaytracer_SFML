@@ -3,14 +3,15 @@
 #include <SFML/Graphics.hpp>
 
 #include "Renderer.h"
+#include "Scene.h"
 
 class Window : public sf::NonCopyable
 {
 public:
 	Window(unsigned int width, unsigned int height, float fov);
 	~Window();
-	void AddSphere(const Sphere& s);
-	void AddLight(const Light& l);
+
+	void SetScene(const Scene& scene);
 	void Run();
 
 private:
@@ -37,10 +38,6 @@ private:
 	sf::Sprite mDisplaySprite;
 	std::vector<Vec3f> mFramebuffer;
 	sf::Uint8* mPixels;
-
-	// Scene 
-	std::vector<Sphere> mScene;
-	std::vector<Light> mLight;
 
 	// Simple Camera Moving from Input WASD
 	bool mIsMovingForward;

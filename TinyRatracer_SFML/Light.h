@@ -16,6 +16,6 @@ public:
 
 	}
 
-	inline Vec3f GetPosition() const { return position; }
+	inline const Vec3f& GetPosition() const { return position; }
 	inline float GetIntensity() const { return intensity; }
 };

@@ -23,6 +23,6 @@ public:
 	}
 
 	inline float GetSpecularExponent() const { return specularExponent; }
-	inline Vec3f GetDiffuseColor() const { return diffuseColor; }
-	inline Vec2f GetAlbedo() const { return albedo; }
+	inline const Vec3f& GetDiffuseColor() const { return diffuseColor; }
+	inline const Vec2f& GetAlbedo() const { return albedo; }
 };

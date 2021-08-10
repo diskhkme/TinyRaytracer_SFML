@@ -8,7 +8,6 @@ Window::Window(unsigned int width, unsigned int height, float fov)
 	mRenderer{width, height, fov},
 	mFramebuffer{width*height},
 	mDisplayTexture{}, mDisplaySprite{},
-	mScene{},
 	mFont{}, mStatisticsText{}, mStatisticsUpdateTime{},
 	mStatisticsNumFrames{ 0 }
 {
@@ -35,14 +34,9 @@ Window::~Window()
 	delete mPixels;
 }
 
-void Window::AddSphere(const Sphere & s)
+void Window::SetScene(const Scene & scene)
 {
-	mScene.emplace_back(s);
-}
-
-void Window::AddLight(const Light & l)
-{
-	mLight.emplace_back(l);
+	mRenderer.SetScene(scene);
 }
 
 void Window::Run()
@@ -112,7 +106,7 @@ void Window::Render()
 {
 	mWindow.clear();
 
-	mRenderer.Render(mFramebuffer, mScene, mLight);
+	mRenderer.Render(mFramebuffer);
 	Utility::ConvertPixelsFromVector(mFramebuffer, mPixels);
 	mDisplayTexture.update(mPixels);
 	
