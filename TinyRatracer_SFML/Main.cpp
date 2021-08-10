@@ -3,8 +3,8 @@
 
 int main()
 {
-	constexpr unsigned int WIDTH = 800;
-	constexpr unsigned int HEIGHT = 600;
+	constexpr unsigned int WIDTH = 400;
+	constexpr unsigned int HEIGHT = 300;
 	constexpr float FOV = 3.14f / 3.0f;
 
 	const Material shinyIvoryMaterial{ Vec2f{0.6f, 0.3f}, Vec3f{0.4f,0.4f,0.3f}, 50.0f };
