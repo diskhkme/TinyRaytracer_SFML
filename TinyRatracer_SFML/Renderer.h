@@ -13,11 +13,11 @@ private:
 	const size_t maximumDepth;
 	Vec3f mCameraPosition;
 
-	Scene mScene;
+	const Scene* mScene;
 
 public:
 	Renderer(unsigned int w, unsigned int h, float fov, size_t maxDepth);
-	void SetScene(const Scene& scene);
+	void SetScene(const Scene* const scene);
 	void Render(std::vector<Vec3f>& frameBuffer);
 
 	void UpdateCamPosition(float dt, const Vec3f& dir);

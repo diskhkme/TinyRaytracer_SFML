@@ -17,22 +17,22 @@ int main()
 	
 	Window* window = new Window{ WIDTH, HEIGHT, FOV, MAXDEPTH };
 
-	Scene scene;
+	Scene* scene = new Scene;
 	// Add sphere objects in scene
-	scene.AddSphere({ Vec3f(-3.0f, 0.0f, -16.0f), 2.0f, shinyIvoryMaterial });
-	scene.AddSphere({ Vec3f(-1.0f,-1.5f, -12.0f), 2.0f, glassMaterial });
-	scene.AddSphere({ Vec3f(1.5f,-0.5f, -18.0f), 3.0f, dullRedMaterial });
-	scene.AddSphere({ Vec3f(7.0f, 5.0f, -18.0f), 4.0f, mirrorMaterial });
+	scene->AddSphere({ Vec3f(-3.0f, 0.0f, -16.0f), 2.0f, shinyIvoryMaterial });
+	scene->AddSphere({ Vec3f(-1.0f,-1.5f, -12.0f), 2.0f, glassMaterial });
+	scene->AddSphere({ Vec3f(1.5f,-0.5f, -18.0f), 3.0f, dullRedMaterial });
+	scene->AddSphere({ Vec3f(7.0f, 5.0f, -18.0f), 4.0f, mirrorMaterial });
 
 	// Add lights in scene
-	scene.AddLight({ Vec3f(-20.0f, 20.0f, 20.0f), 1.5f });
-	scene.AddLight({ Vec3f(30.0f, 50.0f,-25.0f), 1.8f });
-	scene.AddLight({ Vec3f(30.0f, 20.0f, 30.0f), 1.7f });
+	scene->AddLight({ Vec3f(-20.0f, 20.0f, 20.0f), 1.5f });
+	scene->AddLight({ Vec3f(30.0f, 50.0f,-25.0f), 1.8f });
+	scene->AddLight({ Vec3f(30.0f, 20.0f, 30.0f), 1.7f });
 
 	// Add environment
 	try
 	{
-		scene.AddEnvironmentMap("envmap.jpg");
+		scene->AddEnvironmentMap("envmap.jpg");
 	}
 	catch (std::exception &e)
 	{

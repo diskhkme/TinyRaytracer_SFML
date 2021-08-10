@@ -33,7 +33,7 @@ Window::~Window()
 	delete[] mPixels;
 }
 
-void Window::SetScene(const Scene & scene)
+void Window::SetScene(const Scene* const scene)
 {
 	mRenderer.SetScene(scene);
 }

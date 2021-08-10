@@ -11,7 +11,7 @@ Renderer::Renderer(unsigned int w, unsigned int h, float fov, size_t maxDepth)
 {
 }
 
-void Renderer::SetScene(const Scene & scene)
+void Renderer::SetScene(const Scene* const scene)
 {
 	mScene = scene;
 }
@@ -37,8 +37,9 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, size_t cu
 	Material material;
 	
 	if(currentDepth > maximumDepth || !SceneIntersect(origin, direction, hit, normal, material))
-	{ 
-		return Vec3f{ 0.2f, 0.7f, 0.8f };
+	{
+		//교차하는 물체가 없으면 direction으로부터 env map의 픽셀 정보를 얻어옴
+		return mScene->GetEnvironmentColor(direction);
 	}
 	// 교차하는 물체가 있는경우 hit,normal,material 정보가 저장됨
 
@@ -59,7 +60,7 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, size_t cu
 	float specularIntensity = 0;
 	
 	// Right side evaluated once
-	for (const Light& light : mScene.GetLights())
+	for (const Light& light : mScene->GetLights())
 	{
 		Vec3f lightDir = (light.GetPosition() - hit).normalize();
 		float lightDist = (light.GetPosition() - hit).norm();
@@ -100,7 +101,7 @@ bool Renderer::SceneIntersect(const Vec3f & origin, const Vec3f direction,
 	Vec3f fillColor{};
 	bool filled = false;
 
-	for (const Sphere& s : mScene.GetObjects()) // Right side evaluated once
+	for (const Sphere& s : mScene->GetObjects()) // Right side evaluated once
 	{
 		if (s.RayIntersect(origin, direction, sphereDist))
 		{

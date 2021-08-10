@@ -11,7 +11,7 @@ public:
 	Window(unsigned int width, unsigned int height, float fov, size_t maxDepth);
 	~Window();
 
-	void SetScene(const Scene& scene);
+	void SetScene(const Scene* const scene);
 	void Run();
 
 private:
@@ -38,5 +38,5 @@ private:
 	sf::Uint8* mPixels;
 
 	// Single frame render signal
-	bool startRender = false;
+	bool startRender = true;
 };
