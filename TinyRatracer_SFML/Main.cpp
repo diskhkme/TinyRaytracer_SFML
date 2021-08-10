@@ -6,7 +6,7 @@ int main()
 	constexpr unsigned int WIDTH = 400;
 	constexpr unsigned int HEIGHT = 300;
 	constexpr float FOV = 3.14f / 3.0f;
-	constexpr size_t MAXDEPTH = 6;
+	constexpr size_t MAXDEPTH = 4;
 
 	const Material shinyIvoryMaterial{ Vec4f{0.6f, 0.3f, 0.1f, 0.0f }, Vec3f{0.4f,0.4f,0.3f}, 50.0f, 1.0f };
 	const Material dullRedMaterial{ Vec4f{0.7f, 0.1f, 0.0f, 0.0f }, Vec3f{0.5f,0.1f,0.1f}, 5.0f, 1.0f };

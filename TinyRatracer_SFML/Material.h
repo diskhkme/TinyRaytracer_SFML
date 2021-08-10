@@ -25,6 +25,11 @@ public:
 
 	}
 
+	void SetDiffuseColor(const Vec3f color)
+	{
+		diffuseColor = color;
+	}
+
 	inline float GetSpecularExponent() const { return specularExponent; }
 	inline const Vec3f& GetDiffuseColor() const { return diffuseColor; }
 	inline const Vec4f& GetAlbedo() const { return albedo; }
