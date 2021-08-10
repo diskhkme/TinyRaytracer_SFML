@@ -27,5 +27,6 @@ private:
 		Vec3f& hit, Vec3f& normal, Material& material);
 
 	inline Vec3f Reflect(const Vec3f& l, const Vec3f& n) const;
+	Vec3f Refract(const Vec3f& I, const Vec3f& N, const float refractiveIndex) const;
 
 };

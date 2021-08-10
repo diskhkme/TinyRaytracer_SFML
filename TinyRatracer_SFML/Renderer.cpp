@@ -42,12 +42,18 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, size_t cu
 	}
 	// 교차하는 물체가 있는경우 hit,normal,material 정보가 저장됨
 
+	//---Reflection
 	Vec3f reflectDir = Reflect(direction, normal).normalize();
 	Vec3f reflectOrigin = reflectDir * normal < 0 ? hit - normal * 1e-3 : hit + normal * 1e-3;
 	// 부딪힌 점의 색상은 그 점에서 reflection 방향으로 다시 빛을 쏘아 intersection한 곳의 색상.
 	// 그 intersection의 색상은 다시 reflection 방향으로 빛을 recursive하게 쏘아 계산.
 	// depth는 이렇게 몇번까지 intersection 계산을 한 것인지 제어함
 	Vec3f reflectColor = CastRay(reflectOrigin, reflectDir, currentDepth + 1);
+	
+	//---Refraction
+	Vec3f refractDir = Refract(direction, normal, material.GetRefractiveIndex()).normalize();
+	Vec3f refractOrigin = refractDir * normal < 0 ? hit - normal * 1e-3 : hit + normal * 1e-3;
+	Vec3f refractColor = CastRay(refractOrigin, refractDir, currentDepth + 1);
 
 	float diffuseIntensity = 0;
 	float specularIntensity = 0;
@@ -76,10 +82,12 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, size_t cu
 							*light.GetIntensity();
 	}
 
-	Vec3f materialAlbedo = material.GetAlbedo();
+	Vec4f materialAlbedo = material.GetAlbedo();
 	Vec3f color = material.GetDiffuseColor() * diffuseIntensity * materialAlbedo[0] // diffuse term
 		+ Vec3f{ 1.0f, 1.0f, 1.0f }*specularIntensity * materialAlbedo[1] // specular term
-		+ reflectColor * materialAlbedo[2]; // reflect term
+		+ reflectColor * materialAlbedo[2] // reflect term
+		+ refractColor * materialAlbedo[3]; // refract term
+
 	Utility::SaturateColor(color);
 	return color;
 }
@@ -109,6 +117,23 @@ bool Renderer::SceneIntersect(const Vec3f & origin, const Vec3f direction,
 Vec3f Renderer::Reflect(const Vec3f & l, const Vec3f & n) const
 {
 	return l - n * 2.0f*(n*l);
+}
+
+Vec3f Renderer::Refract(const Vec3f& I, const Vec3f& N, const float refractiveIndex) const
+{
+	float cosi = -std::max(-1.0f, std::min(1.0f, I*N));
+	float etai = 1, etat = refractiveIndex;
+	Vec3f n = N;
+	if (cosi < 0)
+	{
+		cosi = -cosi;
+		std::swap(etai, etat);
+		n = -N;
+	}
+	float eta = etai / etat;
+	float k = 1 - eta * eta*(1 - cosi * cosi);
+	//Step 8 메모 참조
+	return k < 0 ? Vec3f{ 0, 0, 0 } : I * eta + n * (eta*cosi - sqrtf(k));
 }
 
 
