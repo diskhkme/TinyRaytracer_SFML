@@ -19,7 +19,7 @@ private:
 	void Update(sf::Time elapsedTime);
 	void Render();
 
-	void UpdateStatistics(sf::Time elapsedTime);
+	void UpdateStatistics(sf::Time renderTime);
 	void HandlePlayerInput(sf::Keyboard::Key key, bool isPressed);
 
 private:
@@ -29,8 +29,6 @@ private:
 
 	sf::Font mFont;
 	sf::Text mStatisticsText;
-	sf::Time mStatisticsUpdateTime;
-	size_t mStatisticsNumFrames;
 
 	Renderer mRenderer;
 	// Renderer outputs
@@ -39,9 +37,6 @@ private:
 	std::vector<Vec3f> mFramebuffer;
 	sf::Uint8* mPixels;
 
-	// Simple Camera Moving from Input WASD
-	bool mIsMovingForward;
-	bool mIsMovingBackward;
-	bool mIsMovingLeft;
-	bool mIsMovingRight;
+	// Single frame render signal
+	bool startRender = false;
 };

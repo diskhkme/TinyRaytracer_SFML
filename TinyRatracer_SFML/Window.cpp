@@ -8,8 +8,7 @@ Window::Window(unsigned int width, unsigned int height, float fov, size_t maxDep
 	mRenderer{width, height, fov, maxDepth },
 	mFramebuffer{width*height},
 	mDisplayTexture{}, mDisplaySprite{},
-	mFont{}, mStatisticsText{}, mStatisticsUpdateTime{},
-	mStatisticsNumFrames{ 0 }
+	mFont{}, mStatisticsText{}
 {
 	mFont.loadFromFile("Sansation.ttf");
 	mStatisticsText.setFont(mFont);
@@ -31,7 +30,7 @@ Window::Window(unsigned int width, unsigned int height, float fov, size_t maxDep
 
 Window::~Window()
 {
-	delete mPixels;
+	delete[] mPixels;
 }
 
 void Window::SetScene(const Scene & scene)
@@ -42,21 +41,22 @@ void Window::SetScene(const Scene & scene)
 void Window::Run()
 {
 	sf::Clock clock;
-	sf::Time timeSinceLastUpdate = sf::Time::Zero;
 	while (mWindow.isOpen())
 	{
-		sf::Time elapsedTime = clock.restart();
-		timeSinceLastUpdate += elapsedTime;
-		while (timeSinceLastUpdate > timePerFrame)
+		ProcessEvents();
+
+		if (startRender)
 		{
-			timeSinceLastUpdate -= timePerFrame;
-
-			ProcessEvents();
-			Update(timePerFrame);
+			sf::Time renderTime = clock.restart();
+			Render();
+			renderTime = clock.getElapsedTime();
+			UpdateStatistics(renderTime);
+					   
+			mWindow.draw(mDisplaySprite);
+			mWindow.draw(mStatisticsText);
+			mWindow.display();
+			startRender = false;
 		}
-
-		UpdateStatistics(elapsedTime);
-		Render();
 	}
 }
 
@@ -84,22 +84,7 @@ void Window::ProcessEvents()
 
 void Window::Update(sf::Time elapsedTime)
 {
-	Vec3f camMovingDir{ 0.0f,0.0f,0.0f };
-	if (mIsMovingForward)
-		camMovingDir = camMovingDir + Vec3f{ 0.0f,0.0f,-1.0f };
-	if (mIsMovingBackward)
-		camMovingDir = camMovingDir + Vec3f{ 0.0f,0.0f, 1.0f };
-	if (mIsMovingLeft)
-		camMovingDir = camMovingDir + Vec3f{ -1.0f,0.0f, 0.0f };
-	if (mIsMovingRight)
-		camMovingDir = camMovingDir + Vec3f{  1.0f,0.0f, 0.0f };
-
-	if (mIsMovingForward || mIsMovingBackward || mIsMovingLeft || mIsMovingRight)
-	{
-		camMovingDir.normalize();
-		mRenderer.UpdateCamPosition(elapsedTime.asSeconds(), camMovingDir);
-	}
-	
+	// Scene update?
 }
 
 void Window::Render()
@@ -109,39 +94,17 @@ void Window::Render()
 	mRenderer.Render(mFramebuffer);
 	Utility::ConvertPixelsFromVector(mFramebuffer, mPixels);
 	mDisplayTexture.update(mPixels);
-	
-
-	mWindow.draw(mDisplaySprite);
-	mWindow.draw(mStatisticsText);
-	mWindow.display();
 }
 
-void Window::UpdateStatistics(sf::Time elapsedTime)
+void Window::UpdateStatistics(sf::Time renderTime)
 {
-	mStatisticsUpdateTime += elapsedTime;
-	mStatisticsNumFrames += 1;
-
-	if (mStatisticsUpdateTime >= sf::seconds(1.0f))
-	{
-		sf::Int64 averageTimePerUpdate = mStatisticsUpdateTime.asMilliseconds() / mStatisticsNumFrames;
-		mStatisticsText.setString(
-			"Frames / Second = " + std::to_string(mStatisticsNumFrames / mStatisticsUpdateTime.asSeconds()) + "\n" +
-			"Time / Update = " + std::to_string(averageTimePerUpdate) + "ms");
-
-		mStatisticsUpdateTime -= sf::seconds(1.0f);
-		mStatisticsNumFrames = 0;
-	}
+	mStatisticsText.setString(
+		"Rendering takes = " + std::to_string(renderTime.asMilliseconds()) + " ms");
 }
 
 void Window::HandlePlayerInput(sf::Keyboard::Key key, bool isPressed)
 {
-	if (key == sf::Keyboard::W)
-		mIsMovingForward = isPressed;
-	else if (key == sf::Keyboard::S)
-		mIsMovingBackward = isPressed;
-	else if (key == sf::Keyboard::A)
-		mIsMovingLeft = isPressed;
-	else if (key == sf::Keyboard::D)
-		mIsMovingRight = isPressed;
+	if (key == sf::Keyboard::Space && isPressed)
+		startRender = true;
 }
 
