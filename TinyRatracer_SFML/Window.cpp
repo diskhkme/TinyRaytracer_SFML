@@ -3,9 +3,9 @@
 
 const sf::Time Window::timePerFrame = sf::seconds(1.0f / 60.0f);
 
-Window::Window(unsigned int width, unsigned int height, float fov)
+Window::Window(unsigned int width, unsigned int height, float fov, size_t maxDepth)
 	: mWindow{ sf::VideoMode(width, height), "My Application", sf::Style::Close },
-	mRenderer{width, height, fov},
+	mRenderer{width, height, fov, maxDepth },
 	mFramebuffer{width*height},
 	mDisplayTexture{}, mDisplaySprite{},
 	mFont{}, mStatisticsText{}, mStatisticsUpdateTime{},

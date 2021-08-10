@@ -8,7 +8,7 @@
 class Window : public sf::NonCopyable
 {
 public:
-	Window(unsigned int width, unsigned int height, float fov);
+	Window(unsigned int width, unsigned int height, float fov, size_t maxDepth);
 	~Window();
 
 	void SetScene(const Scene& scene);

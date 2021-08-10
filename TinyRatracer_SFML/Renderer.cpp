@@ -4,9 +4,10 @@
 #include <algorithm>
 #include <vector>
 
-Renderer::Renderer(unsigned int w, unsigned int h, float fov)
+Renderer::Renderer(unsigned int w, unsigned int h, float fov, size_t maxDepth)
 	:width{ w }, height{ h }, fov{ fov },
-	mCameraPosition{0.0f,0.0f,0.0f}
+	mCameraPosition{0.0f,0.0f,0.0f},
+	maximumDepth{maxDepth}
 {
 }
 
@@ -25,21 +26,28 @@ void Renderer::Render(std::vector<Vec3f>& frameBuffer)
 			float x = (2 * (i + 0.5f) / (float)width - 1) * tan(fov / 2.0f)*width / (float)height;
 			float y = -(2 * (j + 0.5f) / (float)height - 1) * tan(fov / 2.0f);
 			Vec3f dir = Vec3f(x, y, -1).normalize();
-			frameBuffer[i + j * width] = CastRay(mCameraPosition, dir); //카메라는 0,0,0에 위치
+			frameBuffer[i + j * width] = CastRay(mCameraPosition, dir, 0); //카메라는 0,0,0에 위치
 		}
 	}
 }
 
-Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction)
+Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, size_t currentDepth)
 {
 	Vec3f hit, normal;
 	Material material;
 	
-	if(!SceneIntersect(origin, direction, hit, normal, material))
+	if(currentDepth > maximumDepth || !SceneIntersect(origin, direction, hit, normal, material))
 	{ 
 		return Vec3f{ 0.2f, 0.7f, 0.8f };
 	}
 	// 교차하는 물체가 있는경우 hit,normal,material 정보가 저장됨
+
+	Vec3f reflectDir = Reflect(direction, normal).normalize();
+	Vec3f reflectOrigin = reflectDir * normal < 0 ? hit - normal * 1e-3 : hit + normal * 1e-3;
+	// 부딪힌 점의 색상은 그 점에서 reflection 방향으로 다시 빛을 쏘아 intersection한 곳의 색상.
+	// 그 intersection의 색상은 다시 reflection 방향으로 빛을 recursive하게 쏘아 계산.
+	// depth는 이렇게 몇번까지 intersection 계산을 한 것인지 제어함
+	Vec3f reflectColor = CastRay(reflectOrigin, reflectDir, currentDepth + 1);
 
 	float diffuseIntensity = 0;
 	float specularIntensity = 0;
@@ -68,9 +76,10 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction)
 							*light.GetIntensity();
 	}
 
-	Vec2f materialAlbedo = material.GetAlbedo();
+	Vec3f materialAlbedo = material.GetAlbedo();
 	Vec3f color = material.GetDiffuseColor() * diffuseIntensity * materialAlbedo[0] // diffuse term
-		+ Vec3f{ 1.0f, 1.0f, 1.0f }*specularIntensity * materialAlbedo[1]; // specular term
+		+ Vec3f{ 1.0f, 1.0f, 1.0f }*specularIntensity * materialAlbedo[1] // specular term
+		+ reflectColor * materialAlbedo[2]; // reflect term
 	Utility::SaturateColor(color);
 	return color;
 }
