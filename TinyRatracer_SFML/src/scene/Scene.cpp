@@ -3,16 +3,32 @@
 #include <exception>
 #include <cmath>
 
-#define PI 3.14159265
+Scene::~Scene()
+{
+	for (ModelBase* mb : objects)
+	{
+		delete mb;
+	}
+
+	for (Light* l : lights)
+	{
+		delete l;
+	}
+}
 
 void Scene::AddSphere(const Sphere & sphere)
 {
-	objects.emplace_back(sphere);
+	objects.emplace_back(new Sphere{ sphere });
 }
 
-void Scene::AddLight(const Light & light)
+void Scene::AddObjModel(const char* filename, const Material& m)
 {
-	lights.emplace_back(light);
+	objects.emplace_back(new Model{ filename, m });
+}
+
+void Scene::AddLight(const Light& light)
+{
+	lights.emplace_back(new Light{ light });
 }
 
 void Scene::AddEnvironmentMap(const std::string & imgFilename)

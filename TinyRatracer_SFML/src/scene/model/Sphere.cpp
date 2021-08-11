@@ -1,12 +1,13 @@
 ﻿#include "Sphere.h"
 
 Sphere::Sphere(const Vec3f& c, const float& r, const Material& m)
-	: center{ c }, radius{ r }, material{ m }
+	: ModelBase{ m }, center {c}, radius{ r }
 {
 
 }
 
-bool Sphere::RayIntersect(const Vec3f& orig, const Vec3f& dir, float& closest) const
+bool Sphere::RayIntersect(const Vec3f& orig, const Vec3f& dir, 
+	float& closest, Vec3f& hit, Vec3f& normal) const
 {
 	Vec3f L = center - orig; //orig에서 출발하여 center를 향하는 벡터
 	float tca = L * dir; // L vector를 dir vector에 projection
@@ -21,6 +22,8 @@ bool Sphere::RayIntersect(const Vec3f& orig, const Vec3f& dir, float& closest) c
 	if (t0 < closest) //가장 가까운 교차일 경우에만 true 반환
 	{
 		closest = t0;
+		hit = orig + dir * closest;
+		normal = (hit - GetCenter()).normalize();
 		return true;
 	}
 	return false;

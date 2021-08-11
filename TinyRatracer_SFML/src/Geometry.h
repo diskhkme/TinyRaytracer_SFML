@@ -5,6 +5,8 @@
 #include <cassert>
 #include <iostream>
 
+#define PI 3.14159265
+
 template <size_t DIM, typename T> struct vec {
 	vec() { for (size_t i = DIM; i--; data_[i] = T()); }
 	T& operator[](const size_t i) { assert(i < DIM); return data_[i]; }
@@ -64,6 +66,12 @@ template<size_t DIM, typename T>vec<DIM, T> operator-(vec<DIM, T> lhs, const vec
 template<size_t DIM, typename T, typename U> vec<DIM, T> operator*(const vec<DIM, T> &lhs, const U& rhs) {
 	vec<DIM, T> ret;
 	for (size_t i = DIM; i--; ret[i] = lhs[i] * rhs);
+	return ret;
+}
+
+template<size_t DIM, typename T, typename U> vec<DIM, T> operator*(const U& lhs , const vec<DIM, T>& rhs) {
+	vec<DIM, T> ret;
+	for (size_t i = DIM; i--; ret[i] = lhs * rhs[i]);
 	return ret;
 }
 

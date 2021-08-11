@@ -10,7 +10,7 @@ Window::Window(unsigned int width, unsigned int height, float fov, size_t maxDep
 	mDisplayTexture{}, mDisplaySprite{},
 	mFont{}, mStatisticsText{}
 {
-	mFont.loadFromFile("Sansation.ttf");
+	mFont.loadFromFile("resources/Sansation.ttf");
 	mStatisticsText.setFont(mFont);
 	mStatisticsText.setPosition(5.f, 5.f);
 	mStatisticsText.setCharacterSize(10);
@@ -55,6 +55,8 @@ void Window::Run()
 			mWindow.draw(mDisplaySprite);
 			mWindow.draw(mStatisticsText);
 			mWindow.display();
+
+			std::cout << "Render Complete!" << std::endl;
 			startRender = false;
 		}
 	}

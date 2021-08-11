@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "Renderer.h"
-#include "Scene.h"
+#include "scene/Scene.h"
 
 class Window : public sf::NonCopyable
 {
