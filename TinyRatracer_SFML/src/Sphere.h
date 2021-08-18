@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Geometry.h"
+#include "Material.h"
 
 #include "../imgui-sfml/imgui.h"
 #include "../imgui-sfml/imgui-SFML.h"
@@ -10,10 +11,10 @@ class Sphere
 private:
 	Vec3f center;
 	float radius;
-	Vec3f color;
+	Material material;
 
 public:
-	Sphere(const Vec3f& c, const float& r, const Vec3f& color) : center{ c }, radius{ r }, color{ color }
+	Sphere(const Vec3f& c, const float& r, const Material& mat) : center{ c }, radius{ r }, material{ mat }
 	{
 
 	}
@@ -40,19 +41,12 @@ public:
 
 	bool EditSphere()
 	{
-		bool e1 = ImGui::ColorEdit3("sphere color", &this->color.x);
+		bool e1 = material.EditMaterial();
 		bool e2 = ImGui::DragFloat3("sphere position", &this->center.x);
 		bool e3 = ImGui::SliderFloat("sphere radius", &this->radius,0.1f, 10.0f);
 		return e1 | e2 | e3;
 	}
 	
-	Vec3f GetColor() const
-	{
-		return color;
-	}
-
-	Vec3f GetCenter() const
-	{
-		return center;
-	}
+	inline Vec3f GetCenter() const { return center;	}
+	inline Material GetMaterial() const { return material; }
 };

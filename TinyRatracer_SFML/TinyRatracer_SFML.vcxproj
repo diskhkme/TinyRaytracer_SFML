@@ -38,6 +38,7 @@
     <ClInclude Include="imgui-sfml\imstb_truetype.h" />
     <ClInclude Include="src\Geometry.h" />
     <ClInclude Include="src\Light.h" />
+    <ClInclude Include="src\Material.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Sphere.h" />
     <ClInclude Include="src\Utility.h" />

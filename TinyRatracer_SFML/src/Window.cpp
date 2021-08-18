@@ -115,7 +115,7 @@ void Window::SetEditorGUI()
 	ImGui::Begin("Edit Camera");
 	ImGui::Text("if values changed, preview screen will be shown");
 	ImGui::Text("after changing the values, press render button again");
-	if (mRenderer.EditCameraPosition())
+	if (mRenderer.EditCamera())
 	{
 		bPreviewOn = true;
 	}

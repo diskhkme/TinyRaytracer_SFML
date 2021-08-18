@@ -6,8 +6,20 @@
 
 #include "Geometry.h"
 
+#define MY_PI (3.1415917f)
+
 class Utility {
 public:
+	inline static float Deg2Rad(float deg)
+	{
+		return deg * MY_PI / 180.0f;
+	}
+
+	inline static float Rad2Deg(float rad)
+	{
+		return rad * 180.0f / MY_PI;
+	}
+
 	inline static sf::Uint8 ConvertFloatToColor(float val)
 	{
 		return (val >= 0.0f) ? static_cast<sf::Uint8>(val*255.0f) : 0;
@@ -34,3 +46,4 @@ public:
 	}
 
 };
+
