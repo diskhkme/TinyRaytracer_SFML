@@ -27,6 +27,7 @@
     <ClCompile Include="imgui-sfml\imgui_widgets.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
+    <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui-sfml\imgui-SFML.h" />
@@ -38,6 +39,8 @@
     <ClInclude Include="src\Geometry.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Sphere.h" />
+    <ClInclude Include="src\Utility.h" />
+    <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

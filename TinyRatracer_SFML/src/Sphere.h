@@ -15,18 +15,6 @@ public:
 
 	}
 
-	Vec3f GetColor() const
-	{
-		return color;
-	}
-
-	void SetColor(const float* const color)
-	{
-		this->color[0] = color[0];
-		this->color[1] = color[1];
-		this->color[2] = color[2];
-	}
-
 	bool rayIntersect(const Vec3f& orig, const Vec3f& dir, float& t0) const
 	{
 		Vec3f L = center - orig; //orig에서 출발하여 center를 향하는 벡터
@@ -39,6 +27,27 @@ public:
 		if (t0 < 0) t0 = t1;  //접점이 하나인 경우 or dir 반대 방향에 원이 있는 경우를 처리
 		if (t0 < 0) return false;
 		return true;
+	}
+
+
+	Vec3f GetColor() const
+	{
+		return color;
+	}
+
+	float* GetColor() // ImGUI를 통한 값 수정을 위한 포인터
+	{
+		return &color.x;
+	}
+
+	float* GetRadius() // ImGUI를 통한 값 수정을 위한 포인터
+	{
+		return &radius;
+	}
+
+	float* GetCenter() // ImGUI를 통한 값 수정을 위한 포인터
+	{
+		return &center.x;
 	}
 
 };
