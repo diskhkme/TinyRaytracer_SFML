@@ -7,6 +7,8 @@
 #include "../imgui-sfml/imgui-SFML.h"
 
 #include "Geometry.h"
+#include "Renderer.h"
+#include "Sphere.h"
 
 inline sf::Uint8 ConvertFloatToColor(float val)
 {
@@ -26,20 +28,6 @@ void ConvertPixelsFromVector(const std::vector<Vec3f>& framebuffer, sf::Uint8* p
 	}
 }
 
-sf::Int32 Render(std::vector<Vec3f>& framebuffer, const int& width, const int& height)
-{
-	sf::Clock clock;
-	for (size_t j = 0; j < height; j++)
-	{
-		for (size_t i = 0; i < width; i++)
-		{
-			framebuffer[i + j * width] = Vec3f(j / float(height), i / float(width), 0);
-		}
-	}
-	sf::Int32 elapsedTime = clock.getElapsedTime().asMilliseconds();
-	return elapsedTime;
-}
-
 sf::Int32 UpdateDisplay(sf::Texture& targetTexture, const std::vector<Vec3f>& framebuffer, sf::Uint8* const pixels)
 {
 	sf::Clock clock;
@@ -51,9 +39,11 @@ sf::Int32 UpdateDisplay(sf::Texture& targetTexture, const std::vector<Vec3f>& fr
 
 int main()
 {
-	constexpr int WIDTH = 1024;
-	constexpr int HEIGHT = 768;
+	constexpr unsigned int WIDTH = 1024;
+	constexpr unsigned int HEIGHT = 768;
+	constexpr float FOV = 3.14f / 2.f;
 
+	//--- Window and FrameBuffer 초기화
 	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "TinyRenderer");
 	window.setVerticalSyncEnabled(true);
 	ImGui::SFML::Init(window);
@@ -70,6 +60,13 @@ int main()
 	sf::Sprite sprite;
 	sprite.setTexture(targetTexture);
 
+	//---Renderer 초기화
+	Renderer renderer = Renderer{ WIDTH, HEIGHT, FOV };
+
+	//---Scene 정의
+	Sphere sphere{ Vec3f(0,0,-5),1.f };
+
+	//---Window 그리기
 	sf::Int32 renderTime = 0;
 	sf::Int32 updateTime = 0;
 
@@ -91,12 +88,14 @@ int main()
 
 		ImGui::Text("Press Render button to render");
 		if (ImGui::Button("Render")) {
-			renderTime = Render(framebuffer, WIDTH, HEIGHT);
+			renderTime = renderer.Render(framebuffer, sphere);
 			updateTime = UpdateDisplay(targetTexture, framebuffer, pixels);
 		}
-		ImGui::Text("Rendering: %d ms \t Update: %d ms", renderTime, updateTime);
+		ImGui::Text("Rendering: %d ms", renderTime);
+		ImGui::Text("Update Display: %d ms", updateTime);
+		
 
-		ImGui::End(); // end window
+		ImGui::End();
 
 		window.clear();
 		window.draw(sprite);

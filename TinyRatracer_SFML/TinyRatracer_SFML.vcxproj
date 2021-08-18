@@ -26,6 +26,7 @@
     <ClCompile Include="imgui-sfml\imgui_tables.cpp" />
     <ClCompile Include="imgui-sfml\imgui_widgets.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui-sfml\imgui-SFML.h" />
@@ -35,6 +36,8 @@
     <ClInclude Include="imgui-sfml\imstb_textedit.h" />
     <ClInclude Include="imgui-sfml\imstb_truetype.h" />
     <ClInclude Include="src\Geometry.h" />
+    <ClInclude Include="src\Renderer.h" />
+    <ClInclude Include="src\Sphere.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
