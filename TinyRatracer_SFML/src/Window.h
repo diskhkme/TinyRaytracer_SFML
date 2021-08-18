@@ -14,6 +14,7 @@ public:
 			unsigned int previewWidth, unsigned int previewHeight);
 	~Window();
 	void Run();
+	void AddSphere(const Sphere& s);
 
 private:
 	void SetRenderGUI();
@@ -39,7 +40,7 @@ private:
 
 	bool bPreviewOn = true;
 	
-	// Scene 
-	Sphere mSphere = Sphere{ Vec3f{0.0f,0.0f,-5.0f},1.0f, Vec3f{0.4f, 0.4f, 0.3f} };
-
+	// Scene, composed of multiple spheres
+	std::vector<Sphere> mScene;
+	
 };

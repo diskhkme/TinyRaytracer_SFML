@@ -7,7 +7,8 @@ Window::Window(unsigned int width, unsigned int height, float fov,
 	mRenderer{ width, height, fov, previewWidth, previewHeight },
 	mDisplaySprite{},
 	mFramebuffer{ width*height }, mTexture{},
-	mPreviewFramebuffer{ previewWidth*previewHeight }, mPreviewTexture{}
+	mPreviewFramebuffer{ previewWidth*previewHeight }, mPreviewTexture{},
+	mScene{}
 {
 	assert(mTexture.create(width, height));
 	assert(mPreviewTexture.create(previewWidth, previewHeight));
@@ -59,6 +60,11 @@ void Window::Run()
 	}
 }
 
+void Window::AddSphere(const Sphere & s)
+{
+	mScene.emplace_back(s);
+}
+
 void Window::SetRenderGUI()
 {
 	//---Render Menu
@@ -75,14 +81,19 @@ void Window::SetRenderGUI()
 
 void Window::SetEditorGUI()
 {
-	//---geometry menu
-	ImGui::Begin("Edit Sphere");
+	//---editor menu
+	ImGui::Begin("Edit Scene");
 	ImGui::Text("if values changed, preview screen will be shown");
 	ImGui::Text("after changing the values, press render button again");
-	bool e1 = ImGui::ColorEdit3("sphere color", mSphere.GetColor());
-	bool e2 = ImGui::DragFloat3("sphere position", mSphere.GetCenter());
-	bool e3 = ImGui::SliderFloat("sphere radius", mSphere.GetRadius(),0.1f, 100.0f);
-	bPreviewOn = e1 | e2 | e3;
+	for (int i = 0; i < mScene.size(); i++)
+	{
+		std::string label = "Sphere" + std::to_string(i);
+		if (ImGui::TreeNode(label.c_str()))
+		{
+			bPreviewOn |= mScene[i].EditSphere();
+			ImGui::TreePop();
+		}
+	}
 	ImGui::End();
 }
 
@@ -91,7 +102,7 @@ void Window::RenderImage()
 	if (bPreviewOn)
 	{
 		// No time calculation for preview
-		mRenderer.Render(mPreviewFramebuffer, mSphere, bPreviewOn);
+		mRenderer.Render(mPreviewFramebuffer, mScene, bPreviewOn);
 		Utility::ConvertPixelsFromVector(mPreviewFramebuffer, mPreviewPixels);
 		mPreviewTexture.update(mPreviewPixels);
 
@@ -102,7 +113,7 @@ void Window::RenderImage()
 	}
 	else
 	{
-		renderTime = mRenderer.Render(mFramebuffer, mSphere, bPreviewOn);
+		renderTime = mRenderer.Render(mFramebuffer, mScene, bPreviewOn);
 		sf::Clock clock;
 		Utility::ConvertPixelsFromVector(mFramebuffer, mPixels);
 		mTexture.update(mPixels);
