@@ -18,6 +18,23 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="imgui-sfml\imgui-SFML.cpp" />
+    <ClCompile Include="imgui-sfml\imgui.cpp" />
+    <ClCompile Include="imgui-sfml\imgui_demo.cpp" />
+    <ClCompile Include="imgui-sfml\imgui_draw.cpp" />
+    <ClCompile Include="imgui-sfml\imgui_tables.cpp" />
+    <ClCompile Include="imgui-sfml\imgui_widgets.cpp" />
+    <ClCompile Include="src\Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="imgui-sfml\imgui-SFML.h" />
+    <ClInclude Include="imgui-sfml\imgui-SFML_export.h" />
+    <ClInclude Include="imgui-sfml\imgui.h" />
+    <ClInclude Include="imgui-sfml\imstb_rectpack.h" />
+    <ClInclude Include="imgui-sfml\imstb_textedit.h" />
+    <ClInclude Include="imgui-sfml\imstb_truetype.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{414ECCA3-72DD-455E-AC1E-C76472DEE176}</ProjectGuid>
@@ -153,9 +170,6 @@
       <AdditionalDependencies>sfml-system-s.lib;sfml-window-s.lib;sfml-graphics-s.lib;sfml-audio-s.lib;opengl32.lib;winmm.lib;gdi32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="Main.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
