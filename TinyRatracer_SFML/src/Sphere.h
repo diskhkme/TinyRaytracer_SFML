@@ -18,7 +18,7 @@ public:
 
 	}
 
-	bool rayIntersect(const Vec3f& orig, const Vec3f& dir, float& closest) const
+	bool RayIntersect(const Vec3f& orig, const Vec3f& dir, float& closest) const
 	{
 		Vec3f L = center - orig; //orig에서 출발하여 center를 향하는 벡터
 		float tca = L * dir; // L vector를 dir vector에 projection
@@ -49,5 +49,10 @@ public:
 	Vec3f GetColor() const
 	{
 		return color;
+	}
+
+	Vec3f GetCenter() const
+	{
+		return center;
 	}
 };

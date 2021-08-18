@@ -15,6 +15,7 @@ public:
 	~Window();
 	void Run();
 	void AddSphere(const Sphere& s);
+	void AddLight(const Light& l);
 
 private:
 	void SetRenderGUI();
@@ -42,5 +43,6 @@ private:
 	
 	// Scene, composed of multiple spheres
 	std::vector<Sphere> mScene;
+	std::vector<Light> mLights;
 	
 };

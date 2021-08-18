@@ -26,4 +26,11 @@ public:
 		}
 	}
 
+	static void SaturateColor(Vec3f& color)
+	{
+		color.x = std::min(color.x, 1.0f);
+		color.y = std::min(color.y, 1.0f);
+		color.z = std::min(color.z, 1.0f);
+	}
+
 };
