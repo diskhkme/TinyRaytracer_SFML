@@ -81,7 +81,7 @@ void Window::SetRenderGUI()
 
 void Window::SetEditorGUI()
 {
-	//---editor menu
+	//---edit scene
 	ImGui::Begin("Edit Scene");
 	ImGui::Text("if values changed, preview screen will be shown");
 	ImGui::Text("after changing the values, press render button again");
@@ -93,6 +93,16 @@ void Window::SetEditorGUI()
 			bPreviewOn |= mScene[i].EditSphere();
 			ImGui::TreePop();
 		}
+	}
+	ImGui::End();
+
+	//---edit Camera
+	ImGui::Begin("Edit Camera");
+	ImGui::Text("if values changed, preview screen will be shown");
+	ImGui::Text("after changing the values, press render button again");
+	if (mRenderer.EditCameraPosition())
+	{
+		bPreviewOn = true;
 	}
 	ImGui::End();
 }

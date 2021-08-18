@@ -3,7 +3,8 @@
 Renderer::Renderer(unsigned int w, unsigned int h, float fov,
 	unsigned int previewWidth, unsigned int previewHeight)
 	:width{ w }, height{ h }, fov{ fov }, 
-	previewHeight{previewHeight}, previewWidth { previewWidth }
+	previewHeight{previewHeight}, previewWidth { previewWidth },
+	mCameraPosition{0.0f,0.0f,0.0f}
 {
 }
 
@@ -30,11 +31,16 @@ sf::Int32 Renderer::Render(std::vector<Vec3f>& frameBuffer, const std::vector<Sp
 			float x = (2 * (i + 0.5f) / (float)renderW - 1) * tan(fov / 2.0f)*renderW / (float)renderH;
 			float y = -(2 * (j + 0.5f) / (float)renderH - 1) * tan(fov / 2.0f);
 			Vec3f dir = Vec3f(x, y, -1).normalize();
-			frameBuffer[i + j * renderW] = CastRay(Vec3f(0, 0, 0), dir, scene); //카메라는 0,0,0에 위치
+			frameBuffer[i + j * renderW] = CastRay(mCameraPosition, dir, scene); //카메라는 mCameraPosition에 위치
 		}
 	}
 	sf::Int32 elapsedTime = clock.getElapsedTime().asMilliseconds();
 	return elapsedTime;
+}
+
+bool Renderer::EditCameraPosition()
+{
+	return ImGui::DragFloat3("Camera position", &this->mCameraPosition.x);
 }
 
 Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, const std::vector<Sphere> & scene)
