@@ -1,25 +1,62 @@
+#include <cassert>
+#include <algorithm>
+
 #include <SFML/Graphics.hpp>
 
 #include "../imgui-sfml/imgui.h"
 #include "../imgui-sfml/imgui-SFML.h"
+
+#include "Geometry.h"
+
+inline sf::Uint8 ConvertFloatToColor(float val)
+{
+	return (val >= 0.0f) ? static_cast<sf::Uint8>(val*255.0f) : 0;
+}
+
+void ConvertPixelsFromVector(const std::vector<Vec3f>& framebuffer, sf::Uint8* pixels)
+{
+	size_t pixelCount = framebuffer.size();
+
+	for (size_t i = 0; i < pixelCount; i++)
+	{
+		pixels[4 * i + 0] = ConvertFloatToColor(framebuffer[i].x);
+		pixels[4 * i + 1] = ConvertFloatToColor(framebuffer[i].y);
+		pixels[4 * i + 2] = ConvertFloatToColor(framebuffer[i].z);
+		pixels[4 * i + 3] = 255;
+	}
+}
+
+sf::Int32 Render(std::vector<Vec3f>& framebuffer, const int& width, const int& height)
+{
+	sf::Clock clock;
+	for (size_t j = 0; j < height; j++)
+	{
+		for (size_t i = 0; i < width; i++)
+		{
+			framebuffer[i + j * width] = Vec3f(j / float(height), i / float(width), 0);
+		}
+	}
+	sf::Int32 elapsedTime = clock.getElapsedTime().asMilliseconds();
+	return elapsedTime;
+}
+
+sf::Int32 UpdateDisplay(sf::Texture& targetTexture, const std::vector<Vec3f>& framebuffer, sf::Uint8* const pixels)
+{
+	sf::Clock clock;
+	ConvertPixelsFromVector(framebuffer, pixels);
+	targetTexture.update(pixels);
+	sf::Int32 elapsedTime = clock.getElapsedTime().asMilliseconds();
+	return elapsedTime;
+}
 
 int main()
 {
 	constexpr int WIDTH = 1024;
 	constexpr int HEIGHT = 768;
 
-	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "SFML works!");
+	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "TinyRenderer");
 	window.setVerticalSyncEnabled(true);
 	ImGui::SFML::Init(window);
-
-	sf::Color bgColor;
-
-	float color[3] = { 0.f, 0.f, 0.f };
-
-	// let's use char array as buffer, see next part
-	// for instructions on using std::string with ImGui
-	char windowTitle[255] = "ImGui + SFML = <3";
-
 
 	sf::Texture targetTexture;
 	if (!targetTexture.create(WIDTH, HEIGHT))
@@ -27,27 +64,14 @@ int main()
 		return -1;
 	}
 
+	std::vector<Vec3f> framebuffer(WIDTH * HEIGHT);
 	sf::Uint8* pixels = new sf::Uint8[WIDTH * HEIGHT * 4];
-
-	sf::Clock clock;
-	for (size_t j = 0; j < HEIGHT; j++)
-	{
-		for (size_t i = 0; i < WIDTH; i++)
-		{
-			pixels[(i + j * WIDTH) * 4 + 0] = static_cast<sf::Uint8>((j / float(HEIGHT)) * 255); // R Channel
-			pixels[(i + j * WIDTH) * 4 + 1] = static_cast<sf::Uint8>((i / float(WIDTH)) * 255); // G Channel
-			pixels[(i + j * WIDTH) * 4 + 2] = 0; // B Channel
-			pixels[(i + j * WIDTH) * 4 + 3] = 255; // A Channel
-		}
-	}
-	sf::Int32 elapsedTime = clock.getElapsedTime().asMilliseconds();
-	window.setTitle(sf::String{ std::to_string(elapsedTime) + " ms" });
-
-
-	targetTexture.update(pixels);
 
 	sf::Sprite sprite;
 	sprite.setTexture(targetTexture);
+
+	sf::Int32 renderTime = 0;
+	sf::Int32 updateTime = 0;
 
 	sf::Clock deltaClock;
 	while (window.isOpen())
@@ -63,26 +87,15 @@ int main()
 
 		ImGui::SFML::Update(window, deltaClock.restart());
 
-		ImGui::Begin("Sample window"); // begin window
+		ImGui::Begin("Menu"); 
 
-									   // Background color edit
-		if (ImGui::ColorEdit3("Background color", color)) {
-			// this code gets called if color value changes, so
-			// the background color is upgraded automatically!
-			bgColor.r = static_cast<sf::Uint8>(color[0] * 255.f);
-			bgColor.g = static_cast<sf::Uint8>(color[1] * 255.f);
-			bgColor.b = static_cast<sf::Uint8>(color[2] * 255.f);
+		ImGui::Text("Press Render button to render");
+		if (ImGui::Button("Render")) {
+			renderTime = Render(framebuffer, WIDTH, HEIGHT);
+			updateTime = UpdateDisplay(targetTexture, framebuffer, pixels);
 		}
+		ImGui::Text("Rendering: %d ms \t Update: %d ms", renderTime, updateTime);
 
-		// Window title text edit
-		ImGui::InputText("Window title", windowTitle, 255);
-
-		if (ImGui::Button("Update window title")) {
-			// this code gets if user clicks on the button
-			// yes, you could have written if(ImGui::InputText(...))
-			// but I do this to show how buttons work :)
-			window.setTitle(windowTitle);
-		}
 		ImGui::End(); // end window
 
 		window.clear();
