@@ -40,6 +40,7 @@ private:
 	bool SceneIntersect(const Vec3f& origin, const Vec3f direction,
 		Vec3f& hit, Vec3f& normal, Material& material) const;
 	inline Vec3f Reflect(const Vec3f& l, const Vec3f& n) const;
+	Vec3f Refract(const Vec3f& I, const Vec3f& N, const float refractiveIndex) const;
 
 	bool EditCamera();
 	void UpdateCamera();
