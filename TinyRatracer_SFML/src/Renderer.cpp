@@ -5,7 +5,7 @@
 
 Renderer::Renderer(unsigned int w, unsigned int h, float fov, size_t maxDepth,
 	unsigned int previewWidth, unsigned int previewHeight)
-	:width{ w }, height{ h }, fov{ fov }, maxDepth{ maxDepth },
+	:width{ w }, height{ h }, fov{ fov }, maxDepth{ maxDepth }, currentMaxDepth{maxDepth},
 	previewHeight{previewHeight}, previewWidth { previewWidth },
 	mOrbitCameraParameter{11.0f,Utility::Deg2Rad(-90.0f),0.0f},
 	mCameraForward{0.0f,0.0f,-1.0f}
@@ -36,7 +36,7 @@ sf::Int32 Renderer::Render(std::vector<Vec3f>& frameBuffer, bool isPreview) cons
 			float x = (2 * (i + 0.5f) / (float)renderW - 1) * tan(fov / 2.0f)*renderW / (float)renderH;
 			float y = -(2 * (j + 0.5f) / (float)renderH - 1) * tan(fov / 2.0f);
 			Vec3f dir = ((mCameraRight * x) + (mCameraUp * y) + mCameraForward).normalize();
-			frameBuffer[i + j * renderW] = CastRay(mCameraPosition, dir, 0); //Depth 0부터 시작
+			frameBuffer[i + j * renderW] = CastRay(mCameraPosition, dir, isPreview, 0); //Depth 0부터 시작
 		}
 	}
 	sf::Int32 elapsedTime = clock.getElapsedTime().asMilliseconds();
@@ -94,27 +94,36 @@ void Renderer::UpdateCamera()
 	mCameraUp = cross(mCameraRight, mCameraForward).normalize();
 }
 
-Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, size_t currentDepth) const
+Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, bool isPreview, size_t currentDepth) const
 {
 	Vec3f hit, normal;
 	Material material;
 
-	if (currentDepth > maxDepth || !SceneIntersect(origin, direction, hit, normal, material))
+	if (isPreview)
 	{
-		//교차하는 물체가 없으면 direction으로부터 env map의 픽셀 정보를 얻어옴
-		return mScene->GetEnvironmentColor(direction);
+		if (currentDepth > 1 || !SceneIntersect(origin, direction, hit, normal, material))
+		{
+			return mScene->GetEnvironmentColor(direction);
+		}
 	}
-	// 교차하는 물체가 있는경우 hit,normal,material 정보가 저장됨
+	else
+	{
+		if (currentDepth > maxDepth || !SceneIntersect(origin, direction, hit, normal, material))
+		{
+			return mScene->GetEnvironmentColor(direction);
+		}
+	}
+	
 
 	//---Reflection
 	Vec3f reflectDir = Reflect(direction, normal).normalize();
 	Vec3f reflectOrigin = reflectDir * normal < 0 ? hit - normal * 1e-3 : hit + normal * 1e-3;
-	Vec3f reflectColor = CastRay(reflectOrigin, reflectDir, currentDepth + 1);
+	Vec3f reflectColor = CastRay(reflectOrigin, reflectDir, isPreview, currentDepth + 1);
 
 	//---Refraction
 	Vec3f refractDir = Refract(direction, normal, material.GetRefractiveIndex()).normalize();
 	Vec3f refractOrigin = refractDir * normal < 0 ? hit - normal * 1e-3 : hit + normal * 1e-3;
-	Vec3f refractColor = CastRay(refractOrigin, refractDir, currentDepth + 1);
+	Vec3f refractColor = CastRay(refractOrigin, refractDir, isPreview, currentDepth + 1);
 
 	float diffuseIntensity = 0;
 	float specularIntensity = 0;

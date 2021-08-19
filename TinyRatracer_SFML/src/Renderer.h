@@ -16,6 +16,7 @@ private:
 	const unsigned int previewHeight;
 	float fov;
 	size_t maxDepth;
+	size_t currentMaxDepth;
 
 	// Scene
 	SceneManager* mScene;
@@ -36,7 +37,7 @@ public:
 	void SetScene(SceneManager* const scene);
 	
 private:
-	Vec3f CastRay(const Vec3f& origin, const Vec3f& direction, size_t currentDepth) const;
+	Vec3f CastRay(const Vec3f& origin, const Vec3f& direction, bool isPreview, size_t currentDepth) const;
 	bool SceneIntersect(const Vec3f& origin, const Vec3f direction,
 		Vec3f& hit, Vec3f& normal, Material& material) const;
 	inline Vec3f Reflect(const Vec3f& l, const Vec3f& n) const;
