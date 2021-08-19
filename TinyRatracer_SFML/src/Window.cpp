@@ -1,10 +1,10 @@
 #include "Window.h"
 #include "Utility.h"
 
-Window::Window(unsigned int width, unsigned int height, float fov,
+Window::Window(unsigned int width, unsigned int height, float fov, size_t maxDepth,
 	unsigned int previewWidth, unsigned int previewHeight)
 	: mWindow{ sf::VideoMode{width, height}, "TinyRenderer", sf::Style::Close },
-	mRenderer{ width, height, fov, previewWidth, previewHeight },
+	mRenderer{ width, height, fov, maxDepth, previewWidth, previewHeight },
 	mDisplaySprite{},
 	mFramebuffer{ width*height }, mTexture{},
 	mPreviewFramebuffer{ previewWidth*previewHeight }, mPreviewTexture{}
