@@ -36,7 +36,8 @@ sf::Int32 Renderer::Render(std::vector<Vec3f>& frameBuffer, bool isPreview) cons
 			float x = (2 * (i + 0.5f) / (float)renderW - 1) * tan(fov / 2.0f)*renderW / (float)renderH;
 			float y = -(2 * (j + 0.5f) / (float)renderH - 1) * tan(fov / 2.0f);
 			Vec3f dir = ((mCameraRight * x) + (mCameraUp * y) + mCameraForward).normalize();
-			frameBuffer[i + j * renderW] = CastRay(mCameraPosition, dir, isPreview, 0); //Depth 0부터 시작
+			Ray ray{ mCameraPosition, dir };
+			frameBuffer[i + j * renderW] = CastRay(ray, isPreview, 0); //Depth 0부터 시작
 		}
 	}
 	sf::Int32 elapsedTime = clock.getElapsedTime().asMilliseconds();
@@ -94,65 +95,66 @@ void Renderer::UpdateCamera()
 	mCameraUp = cross(mCameraRight, mCameraForward).normalize();
 }
 
-Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, bool isPreview, size_t currentDepth) const
+Vec3f Renderer::CastRay(const Ray& ray, bool isPreview, size_t currentDepth) const
 {
-	Vec3f hit, normal;
-	Material material;
+	Hit hit;
 
 	if (isPreview)
 	{
-		if (currentDepth > 1 || !SceneIntersect(origin, direction, hit, normal, material))
+		if (currentDepth > 1 || !SceneIntersect(ray, hit))
 		{
-			return mScene->GetEnvironmentColor(direction);
+			return mScene->GetEnvironmentColor(ray.direction);
 		}
 	}
 	else
 	{
-		if (currentDepth > maxDepth || !SceneIntersect(origin, direction, hit, normal, material))
+		if (currentDepth > maxDepth || !SceneIntersect(ray, hit))
 		{
-			return mScene->GetEnvironmentColor(direction);
+			return mScene->GetEnvironmentColor(ray.direction);
 		}
 	}
 	
 
 	//---Reflection
-	Vec3f reflectDir = Reflect(direction, normal).normalize();
-	Vec3f reflectOrigin = reflectDir * normal < 0 ? hit - normal * 1e-3 : hit + normal * 1e-3;
-	Vec3f reflectColor = CastRay(reflectOrigin, reflectDir, isPreview, currentDepth + 1);
+	Vec3f reflectDir = Reflect(ray.direction, hit.normal).normalize();
+	Vec3f reflectOrigin = reflectDir * hit.normal < 0 ? hit.point - hit.normal * EPS : hit.point + hit.normal * EPS;
+	Ray reflectRay{ reflectOrigin,reflectDir };
+	Vec3f reflectColor = CastRay(reflectRay, isPreview, currentDepth + 1);
 
 	//---Refraction
-	Vec3f refractDir = Refract(direction, normal, material.GetRefractiveIndex()).normalize();
-	Vec3f refractOrigin = refractDir * normal < 0 ? hit - normal * 1e-3 : hit + normal * 1e-3;
-	Vec3f refractColor = CastRay(refractOrigin, refractDir, isPreview, currentDepth + 1);
+	Vec3f refractDir = Refract(ray.direction, hit.normal, hit.material.GetRefractiveIndex()).normalize();
+	Vec3f refractOrigin = refractDir * hit.normal < 0 ? hit.point - hit.normal * EPS : hit.point + hit.normal * EPS;
+	Ray refractRay{ refractOrigin,refractDir };
+	Vec3f refractColor = CastRay(refractRay, isPreview, currentDepth + 1);
 
 	float diffuseIntensity = 0;
 	float specularIntensity = 0;
 
 	for (const Light* const light : mScene->GetLights())
 	{
-		Vec3f lightDir = (light->GetPosition() - hit).normalize();
-		float lightDist = (light->GetPosition() - hit).norm();
+		Vec3f lightDir = (light->GetPosition() - hit.point).normalize();
+		dist_t lightDist = (light->GetPosition() - hit.point).norm();
 
 		//Shadow evaluation
-		Vec3f shadowOrigin = (lightDir * normal < 0) ? hit - normal * 1e-3 : hit + normal * 1e-3;
+		Vec3f shadowOrigin = (lightDir * hit.normal < 0) ? hit.point - hit.normal * EPS : hit.point + hit.normal * EPS;
 		Vec3f shadowLightDir = (light->GetPosition() - shadowOrigin).normalize();
+		Ray shadowRay{ shadowOrigin,shadowLightDir };
 
 		// 지금 그리려는 픽셀에서 빛 방향으로 다시 ray 발사
-		Vec3f shadowHit, shadowNormal;
-		Material tempMat;
-		if (SceneIntersect(shadowOrigin, shadowLightDir, shadowHit, shadowNormal, tempMat)
-			&& lightDist > (shadowHit - shadowOrigin).norm()) //다른 물체와 먼저 교차한 경우
+		Hit shadowHit;
+		if (SceneIntersect(shadowRay, shadowHit)
+			&& lightDist > (shadowHit.point - shadowOrigin).norm()) //다른 물체와 먼저 교차한 경우
 		{
 			continue;
 		}
 
-		diffuseIntensity += light->GetIntensity() * std::max(0.0f, lightDir*normal);
-		specularIntensity += std::powf(std::max(0.0f, Reflect(lightDir, normal)*direction), material.GetSpecularExponent())
+		diffuseIntensity += light->GetIntensity() * std::max(0.0f, lightDir*hit.normal);
+		specularIntensity += std::powf(std::max(0.0f, Reflect(lightDir, hit.normal)*ray.direction), hit.material.GetSpecularExponent())
 							* light->GetIntensity();
 	}
 
-	Vec4f materialAlbedo = material.GetAlbedo();
-	Vec3f color = material.GetDiffuseColor() * diffuseIntensity * materialAlbedo[0] // diffuse term
+	Vec4f materialAlbedo = hit.material.GetAlbedo();
+	Vec3f color = hit.material.GetDiffuseColor() * diffuseIntensity * materialAlbedo[0] // diffuse term
 		+ Vec3f{ 1.0f, 1.0f, 1.0f }*specularIntensity * materialAlbedo[1] // specular term
 		+ reflectColor * materialAlbedo[2] // reflect term
 		+ refractColor * materialAlbedo[3]; // refract term
@@ -160,41 +162,28 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, bool isPr
 	return color;
 }
 
-bool Renderer::SceneIntersect(const Vec3f & origin, const Vec3f direction, 
-	Vec3f & hit, Vec3f & normal, Material & material) const
+bool Renderer::SceneIntersect(const Ray& ray, Hit& hit) const
 {
-	float modelDist = std::numeric_limits<float>::max();
-
-	Vec3f fillColor{};
-	bool filled = false;
-	Vec3f checkHit;
-	Vec3f checkNormal;
-
 	for (const ModelBase* const m : mScene->GetObjects())
 	{
-		if (m->RayIntersect(origin, direction, modelDist, checkHit, checkNormal))
-		{
-			hit = checkHit;
-			normal = checkNormal;
-			material = m->GetMaterial();
-		}
+		m->RayIntersect(ray, hit);
 	}
 
 	// Add checkerboard
-	float checkerboard_dist = std::numeric_limits<float>::max();
-	if (fabs(direction.y) > 1e-3) {
-		float d = -(origin.y + 4) / direction.y; // the checkerboard plane has equation y = -4
-		Vec3f pt = origin + direction * d;
-		if (d > 0 && fabs(pt.x) < 10 && pt.z<6 && pt.z>-14 && d < modelDist) {
-			checkerboard_dist = d;
-			hit = pt;
-			normal = Vec3f(0, 1, 0);
-			Vec3f diffuseColor = (int(.5*hit.x + 1000) + int(.5*hit.z)) & 1 ? Vec3f(1, 1, 1) : Vec3f(1, .7, .3);
+	if (fabs(ray.direction.y) > 1e-3) {
+		dist_t d = -(ray.origin.y + 4) / ray.direction.y; // the checkerboard plane has equation y = -4
+		Vec3f pt = ray.origin + ray.direction * d;
+		if (d > 0 && fabs(pt.x) < 10 && pt.z<6 && pt.z>-14 && d < hit.t) {
+			hit.t = d;
+			hit.point = pt;
+			hit.normal = Vec3f(0, 1, 0);
+			Vec3f diffuseColor = (int(.5f*hit.point.x + 1000) + int(.5f*hit.point.z)) & 1 ? Vec3f(1, 1, 1) : Vec3f(1, .7f, .3f);
 			diffuseColor = diffuseColor * 0.3f;
-			material.SetDiffuseColor(diffuseColor);
+			hit.material.SetDiffuseColor(diffuseColor);
 		}
 	}
-	return std::min(modelDist, checkerboard_dist) < 1000;
+	//return std::min(modelDist, checkerboard_dist) < 1000;
+	return hit.t < 1000;
 }
 
 Vec3f Renderer::Reflect(const Vec3f & l, const Vec3f & n) const

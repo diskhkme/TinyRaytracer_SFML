@@ -48,23 +48,23 @@ void ObjModel::LoadModel(const char *filename) {
 	get_bbox(bboxMin, bboxMax);
 }
 
-bool ObjModel::ray_aabb_intersect(const Vec3f &orig, const Vec3f &dir) const
+bool ObjModel::ray_aabb_intersect(const Ray& ray) const
 {
-	float t_min_x = (bboxMin.x - orig.x) / dir.x;
-	float t_min_y = (bboxMin.y - orig.y) / dir.y;
-	float t_min_z = (bboxMin.z - orig.z) / dir.z;
+	float t_min_x = (bboxMin.x - ray.origin.x) / ray.direction.x;
+	float t_min_y = (bboxMin.y - ray.origin.y) / ray.direction.y;
+	float t_min_z = (bboxMin.z - ray.origin.z) / ray.direction.z;
 
-	float t_max_x = (bboxMax.x - orig.x) / dir.x;
-	float t_max_y = (bboxMax.y - orig.y) / dir.y;
-	float t_max_z = (bboxMax.z - orig.z) / dir.z;
+	float t_max_x = (bboxMax.x - ray.origin.x) / ray.direction.x;
+	float t_max_y = (bboxMax.y - ray.origin.y) / ray.direction.y;
+	float t_max_z = (bboxMax.z - ray.origin.z) / ray.direction.z;
 
-	if (dir.x < 0) {
+	if (ray.direction.x < 0) {
 		std::swap(t_max_x, t_min_x);
 	}
-	if (dir.y < 0) {
+	if (ray.direction.y < 0) {
 		std::swap(t_max_y, t_min_y);
 	}
-	if (dir.z < 0) {
+	if (ray.direction.z < 0) {
 		std::swap(t_max_z, t_min_z);
 	}
 
@@ -74,24 +74,24 @@ bool ObjModel::ray_aabb_intersect(const Vec3f &orig, const Vec3f &dir) const
 }
 
 // Moller and Trumbore
-bool ObjModel::ray_triangle_intersect(const int &fi, const Vec3f &orig, const Vec3f &dir, float &tnear, Vec3f& normal) const {
+bool ObjModel::ray_triangle_intersect(const int &fi, const Ray& ray, Hit& hit) const {
 	Vec3f edge1 = point(vert(fi, 1)) - point(vert(fi, 0));
 	Vec3f edge2 = point(vert(fi, 2)) - point(vert(fi, 0));
-	Vec3f pvec = cross(dir, edge2);
-	float det = edge1 * pvec;
+	Vec3f pvec = cross(ray.direction, edge2);
+	dist_t det = edge1 * pvec;
 	if (det < 1e-5) return false;
 
-	Vec3f tvec = orig - point(vert(fi, 0));
-	float u = tvec * pvec;
+	Vec3f tvec = ray.origin - point(vert(fi, 0));
+	dist_t u = tvec * pvec;
 	if (u < 0 || u > det) return false;
 
 	Vec3f qvec = cross(tvec, edge1);
-	float v = dir * qvec;
+	dist_t v = ray.direction * qvec;
 	if (v < 0 || u + v > det) return false;
 
-	tnear = edge2 * qvec * (1. / det);
-	normal = cross(edge1, edge2).normalize();
-	return tnear > 1e-5;
+	hit.t = edge2 * qvec * (1.0f / det);
+	hit.normal = cross(edge1, edge2).normalize();
+	return hit.t > 1e-5f;
 }
 
 
@@ -114,38 +114,36 @@ void ObjModel::get_bbox(Vec3f &min, Vec3f &max) {
 	std::cerr << "bbox: [" << min << " : " << max << "]" << std::endl;
 }
 
-bool ObjModel::RayIntersect(const Vec3f & orig, const Vec3f & dir,
-	float & closest, Vec3f& hit, Vec3f& normal) const
+bool ObjModel::RayIntersect(const Ray& ray, Hit& hit) const
 {
-	if (!ray_aabb_intersect(orig, dir))
+	if (!ray_aabb_intersect(ray))
 		return false;
 
-	float t = std::numeric_limits<float>::max();
+	dist_t min_t = std::numeric_limits<dist_t>::max();
+	Vec3f min_normal;
 	bool isIntersection = false;
-	Vec3f tmpNormal;
+	Hit tmpHit;
 	for (int fi = 0; fi < nfaces(); fi++)
 	{
-		float currentT;
-		if (ray_triangle_intersect(fi, orig, dir, currentT, tmpNormal))
+		if (ray_triangle_intersect(fi, ray, tmpHit))
 		{
-			if (currentT < t) {
-				t = currentT;
-				normal = tmpNormal;
+			if (tmpHit.t < min_t) { // 지금 교차한 삼각형의 t가 기존 min_t보다 작으면,
+				min_t = tmpHit.t; // min_t를 갱신하고,
+				min_normal = tmpHit.normal; // 해당 삼각형의 normal을 기록해둠
 				isIntersection = true;
-
 			}
 		}
-
 	}
 
-	if (isIntersection && t < closest) {
-		closest = t;
-		hit = orig + dir * t;
+	if (isIntersection && min_t < hit.t) { // 현재 obj모델이 화면에 가장 가까운 교차이면
+		hit.t = min_t;
+		hit.normal = min_normal;
+		hit.point = ray.At(min_t);
+		hit.material = material;
 		return true;
 	}
 
 	return false;
-
 }
 
 bool ObjModel::EditModel()

@@ -39,6 +39,9 @@
     <ClInclude Include="imgui-sfml\imstb_textedit.h" />
     <ClInclude Include="imgui-sfml\imstb_truetype.h" />
     <ClInclude Include="src\Geometry.h" />
+    <ClInclude Include="src\Renderer\Hit.h" />
+    <ClInclude Include="src\Renderer\Ray.h" />
+    <ClInclude Include="src\Renderer\RenderOption.h" />
     <ClInclude Include="src\Scene\Light.h" />
     <ClInclude Include="src\Scene\Material.h" />
     <ClInclude Include="src\Scene\ModelBase.h" />
