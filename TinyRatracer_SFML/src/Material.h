@@ -29,6 +29,7 @@ public:
 
 	inline Vec4f GetAlbedo() const { return albedo; }
 	inline Vec3f GetDiffuseColor() const { return diffuseColor; }
+	inline void SetDiffuseColor(const Vec3f color) { diffuseColor = color; } // for checkerboard
 	inline float GetSpecularExponent() const { return specularExponent; }
 	inline float GetRefractiveIndex() const { return refractiveIndex; }
 

@@ -167,7 +167,21 @@ bool Renderer::SceneIntersect(const Vec3f & origin, const Vec3f direction,
 		}
 	}
 
-	return sphereDist < 1000; // 최대 거리. Camera의 far plane이면 적절하겠죠?
+	// Add checkerboard
+	float checkerboard_dist = std::numeric_limits<float>::max();
+	if (fabs(direction.y) > 1e-3) {
+		float d = -(origin.y + 4) / direction.y; // the checkerboard plane has equation y = -4
+		Vec3f pt = origin + direction * d;
+		if (d > 0 && fabs(pt.x) < 10 && pt.z<6 && pt.z>-14 && d < sphereDist) {
+			checkerboard_dist = d;
+			hit = pt;
+			normal = Vec3f(0, 1, 0);
+			Vec3f diffuseColor = (int(.5*hit.x + 1000) + int(.5*hit.z)) & 1 ? Vec3f(1, 1, 1) : Vec3f(1, .7, .3);
+			diffuseColor = diffuseColor * 0.3f;
+			material.SetDiffuseColor(diffuseColor);
+		}
+	}
+	return std::min(sphereDist, checkerboard_dist) < 1000;
 }
 
 Vec3f Renderer::Reflect(const Vec3f & l, const Vec3f & n) const
