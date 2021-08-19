@@ -110,6 +110,20 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction) const
 	for (const Light& light : mScene.GetLights())
 	{
 		Vec3f lightDir = (light.GetPosition() - hit).normalize();
+		float lightDist = (light.GetPosition() - hit).norm();
+
+		//Shadow evaluation
+		Vec3f shadowOrigin = (lightDir * normal < 0) ? hit - normal * 1e-3 : hit + normal * 1e-3;
+		Vec3f shadowLightDir = (light.GetPosition() - shadowOrigin).normalize();
+
+		// 지금 그리려는 픽셀에서 빛 방향으로 다시 ray 발사
+		Vec3f shadowHit, shadowNormal;
+		Material tempMat;
+		if (SceneIntersect(shadowOrigin, shadowLightDir, shadowHit, shadowNormal, tempMat)
+			&& lightDist > (shadowHit - shadowOrigin).norm()) //다른 물체와 먼저 교차한 경우
+		{
+			continue;
+		}
 
 		diffuseIntensity += light.GetIntensity() * std::max(0.0f, lightDir*normal);
 		specularIntensity += std::powf(std::max(0.0f, Reflect(lightDir, normal)*direction), material.GetSpecularExponent())
