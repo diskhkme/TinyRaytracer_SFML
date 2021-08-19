@@ -26,9 +26,9 @@
     <ClCompile Include="imgui-sfml\imgui_tables.cpp" />
     <ClCompile Include="imgui-sfml\imgui_widgets.cpp" />
     <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\ObjModel.cpp" />
-    <ClCompile Include="src\Renderer.cpp" />
-    <ClCompile Include="src\SceneManager.cpp" />
+    <ClCompile Include="src\Scene\ObjModel.cpp" />
+    <ClCompile Include="src\Renderer\Renderer.cpp" />
+    <ClCompile Include="src\Scene\SceneManager.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -39,13 +39,13 @@
     <ClInclude Include="imgui-sfml\imstb_textedit.h" />
     <ClInclude Include="imgui-sfml\imstb_truetype.h" />
     <ClInclude Include="src\Geometry.h" />
-    <ClInclude Include="src\Light.h" />
-    <ClInclude Include="src\Material.h" />
-    <ClInclude Include="src\ModelBase.h" />
-    <ClInclude Include="src\ObjModel.h" />
-    <ClInclude Include="src\Renderer.h" />
-    <ClInclude Include="src\SceneManager.h" />
-    <ClInclude Include="src\Sphere.h" />
+    <ClInclude Include="src\Scene\Light.h" />
+    <ClInclude Include="src\Scene\Material.h" />
+    <ClInclude Include="src\Scene\ModelBase.h" />
+    <ClInclude Include="src\Scene\ObjModel.h" />
+    <ClInclude Include="src\Renderer\Renderer.h" />
+    <ClInclude Include="src\Scene\SceneManager.h" />
+    <ClInclude Include="src\Scene\Sphere.h" />
     <ClInclude Include="src\Utility.h" />
     <ClInclude Include="src\Window.h" />
   </ItemGroup>

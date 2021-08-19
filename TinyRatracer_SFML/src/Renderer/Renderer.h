@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Sphere.h"
-#include "Light.h"
-#include "SceneManager.h"
+#include "../Scene/Sphere.h"
+#include "../Scene/Light.h"
+#include "../Scene/SceneManager.h"
+#include "../Geometry.h"
 
 #include "SFML/Graphics.hpp"
 

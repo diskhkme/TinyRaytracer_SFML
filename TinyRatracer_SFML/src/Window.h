@@ -5,8 +5,8 @@
 #include "../imgui-sfml/imgui.h"
 #include "../imgui-sfml/imgui-SFML.h"
 
-#include "Renderer.h"
-#include "SceneManager.h"
+#include "Renderer/Renderer.h"
+#include "Scene/SceneManager.h"
 
 class Window : public sf::NonCopyable
 {

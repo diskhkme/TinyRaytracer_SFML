@@ -138,7 +138,7 @@ bool ObjModel::RayIntersect(const Vec3f & orig, const Vec3f & dir,
 
 	}
 
-	if (isIntersection) {
+	if (isIntersection && t < closest) {
 		closest = t;
 		hit = orig + dir * t;
 		return true;

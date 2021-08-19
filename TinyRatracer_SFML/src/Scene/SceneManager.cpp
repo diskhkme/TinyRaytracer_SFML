@@ -1,5 +1,5 @@
 #include "SceneManager.h"
-#include "Utility.h"
+#include "../Utility.h"
 
 SceneManager::SceneManager()
 	:objects{}, lights{}

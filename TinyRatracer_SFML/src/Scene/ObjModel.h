@@ -2,7 +2,7 @@
 // From https://github.com/ssloy/tinyraytracer/blob/homework_assignment/model.h
 #include <vector>
 #include <string>
-#include "Geometry.h"
+#include "../Geometry.h"
 #include "ModelBase.h"
 
 class ObjModel : public ModelBase {

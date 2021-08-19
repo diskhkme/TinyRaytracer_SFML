@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Geometry.h"
+#include "../Geometry.h"
 
-#include "../imgui-sfml/imgui.h"
-#include "../imgui-sfml/imgui-SFML.h"
+#include "../../imgui-sfml/imgui.h"
+#include "../../imgui-sfml/imgui-SFML.h"
 
 class Light
 {

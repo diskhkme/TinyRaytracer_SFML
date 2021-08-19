@@ -6,8 +6,8 @@
 #include "ObjModel.h"
 #include "Light.h"
 
-#include "../imgui-sfml/imgui.h"
-#include "../imgui-sfml/imgui-SFML.h"
+#include "../../imgui-sfml/imgui.h"
+#include "../../imgui-sfml/imgui-SFML.h"
 
 #include "SFML/Graphics/Image.hpp"
 

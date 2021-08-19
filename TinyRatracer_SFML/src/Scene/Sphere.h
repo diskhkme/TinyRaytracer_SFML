@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "Geometry.h"
+#include "../Geometry.h"
 #include "Material.h"
 #include "ModelBase.h"
 
-#include "../imgui-sfml/imgui.h"
-#include "../imgui-sfml/imgui-SFML.h"
+#include "../../imgui-sfml/imgui.h"
+#include "../../imgui-sfml/imgui-SFML.h"
 
 class Sphere : public ModelBase
 {
