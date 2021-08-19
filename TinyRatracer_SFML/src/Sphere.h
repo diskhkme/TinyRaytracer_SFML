@@ -2,24 +2,25 @@
 
 #include "Geometry.h"
 #include "Material.h"
+#include "ModelBase.h"
 
 #include "../imgui-sfml/imgui.h"
 #include "../imgui-sfml/imgui-SFML.h"
 
-class Sphere
+class Sphere : public ModelBase
 {
 private:
 	Vec3f center;
 	float radius;
-	Material material;
 
 public:
-	Sphere(const Vec3f& c, const float& r, const Material& mat) : center{ c }, radius{ r }, material{ mat }
+	Sphere(const std::string& name, const Vec3f& c, const float& r, const Material& mat) 
+		: ModelBase{ name, mat }, center { c }, radius{ r }
 	{
 
 	}
 
-	bool RayIntersect(const Vec3f& orig, const Vec3f& dir, float& closest) const
+	virtual bool RayIntersect(const Vec3f& orig, const Vec3f& dir, float& closest, Vec3f& hit, Vec3f& normal) const override
 	{
 		Vec3f L = center - orig; //orig에서 출발하여 center를 향하는 벡터
 		float tca = L * dir; // L vector를 dir vector에 projection
@@ -34,12 +35,14 @@ public:
 		if (t0 < closest) //현재 구가 가장 가까운 구인지 확인
 		{
 			closest = t0;
+			hit = orig + dir * closest;
+			normal = (hit - center).normalize();
 			return true;
 		}
 		return false;
 	}
 
-	bool EditSphere()
+	virtual bool EditModel() override
 	{
 		bool e1 = material.EditMaterial();
 		bool e2 = ImGui::DragFloat3("sphere position", &this->center.x, 0.1f);
@@ -47,6 +50,4 @@ public:
 		return e1 | e2 | e3;
 	}
 	
-	inline Vec3f GetCenter() const { return center;	}
-	inline Material GetMaterial() const { return material; }
 };

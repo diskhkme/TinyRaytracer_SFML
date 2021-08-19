@@ -7,7 +7,7 @@ Renderer::Renderer(unsigned int w, unsigned int h, float fov, size_t maxDepth,
 	unsigned int previewWidth, unsigned int previewHeight)
 	:width{ w }, height{ h }, fov{ fov }, maxDepth{ maxDepth }, currentMaxDepth{maxDepth},
 	previewHeight{previewHeight}, previewWidth { previewWidth },
-	mOrbitCameraParameter{11.0f,Utility::Deg2Rad(-90.0f),0.0f},
+	mOrbitCameraParameter{15.0f,Utility::Deg2Rad(-90.0f),0.0f},
 	mCameraForward{0.0f,0.0f,-1.0f}
 {
 	UpdateCamera();
@@ -128,14 +128,14 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, bool isPr
 	float diffuseIntensity = 0;
 	float specularIntensity = 0;
 
-	for (const Light& light : mScene->GetLights())
+	for (const Light* const light : mScene->GetLights())
 	{
-		Vec3f lightDir = (light.GetPosition() - hit).normalize();
-		float lightDist = (light.GetPosition() - hit).norm();
+		Vec3f lightDir = (light->GetPosition() - hit).normalize();
+		float lightDist = (light->GetPosition() - hit).norm();
 
 		//Shadow evaluation
 		Vec3f shadowOrigin = (lightDir * normal < 0) ? hit - normal * 1e-3 : hit + normal * 1e-3;
-		Vec3f shadowLightDir = (light.GetPosition() - shadowOrigin).normalize();
+		Vec3f shadowLightDir = (light->GetPosition() - shadowOrigin).normalize();
 
 		// 지금 그리려는 픽셀에서 빛 방향으로 다시 ray 발사
 		Vec3f shadowHit, shadowNormal;
@@ -146,9 +146,9 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, bool isPr
 			continue;
 		}
 
-		diffuseIntensity += light.GetIntensity() * std::max(0.0f, lightDir*normal);
+		diffuseIntensity += light->GetIntensity() * std::max(0.0f, lightDir*normal);
 		specularIntensity += std::powf(std::max(0.0f, Reflect(lightDir, normal)*direction), material.GetSpecularExponent())
-							*light.GetIntensity();
+							* light->GetIntensity();
 	}
 
 	Vec4f materialAlbedo = material.GetAlbedo();
@@ -163,17 +163,20 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, bool isPr
 bool Renderer::SceneIntersect(const Vec3f & origin, const Vec3f direction, 
 	Vec3f & hit, Vec3f & normal, Material & material) const
 {
-	float sphereDist = std::numeric_limits<float>::max();
+	float modelDist = std::numeric_limits<float>::max();
 
 	Vec3f fillColor{};
 	bool filled = false;
-	for (const Sphere& s : mScene->GetObjects())
+	Vec3f checkHit;
+	Vec3f checkNormal;
+
+	for (const ModelBase* const m : mScene->GetObjects())
 	{
-		if (s.RayIntersect(origin, direction, sphereDist))
+		if (m->RayIntersect(origin, direction, modelDist, checkHit, checkNormal))
 		{
-			hit = origin + direction * sphereDist;
-			normal = (hit - s.GetCenter()).normalize();
-			material = s.GetMaterial();
+			hit = checkHit;
+			normal = checkNormal;
+			material = m->GetMaterial();
 		}
 	}
 
@@ -182,7 +185,7 @@ bool Renderer::SceneIntersect(const Vec3f & origin, const Vec3f direction,
 	if (fabs(direction.y) > 1e-3) {
 		float d = -(origin.y + 4) / direction.y; // the checkerboard plane has equation y = -4
 		Vec3f pt = origin + direction * d;
-		if (d > 0 && fabs(pt.x) < 10 && pt.z<6 && pt.z>-14 && d < sphereDist) {
+		if (d > 0 && fabs(pt.x) < 10 && pt.z<6 && pt.z>-14 && d < modelDist) {
 			checkerboard_dist = d;
 			hit = pt;
 			normal = Vec3f(0, 1, 0);
@@ -191,7 +194,7 @@ bool Renderer::SceneIntersect(const Vec3f & origin, const Vec3f direction,
 			material.SetDiffuseColor(diffuseColor);
 		}
 	}
-	return std::min(sphereDist, checkerboard_dist) < 1000;
+	return std::min(modelDist, checkerboard_dist) < 1000;
 }
 
 Vec3f Renderer::Reflect(const Vec3f & l, const Vec3f & n) const
@@ -199,19 +202,16 @@ Vec3f Renderer::Reflect(const Vec3f & l, const Vec3f & n) const
 	return l - n * 2.0f*(n*l);
 }
 
-Vec3f Renderer::Refract(const Vec3f& I, const Vec3f& N, const float refractiveIndex) const
+Vec3f Renderer::Refract(const Vec3f& I, const Vec3f& N, const float etat, float etai) const
 {
 	float cosi = -std::max(-1.0f, std::min(1.0f, I*N));
-	float etai = 1, etat = refractiveIndex;
-	Vec3f n = N;
-	if (cosi < 0)
+	
+	if (cosi < 0.0f)
 	{
-		cosi = -cosi;
-		std::swap(etai, etat);
-		n = -N;
+		return Refract(I, -N, etai, etat);
 	}
 	float eta = etai / etat;
-	float k = 1 - eta * eta*(1 - cosi * cosi);
-	//Step 8 메모 참조
-	return k < 0 ? Vec3f{ 0, 0, 0 } : I * eta + n * (eta*cosi - sqrtf(k));
+	float k = 1.0f - eta * eta*(1.0f - cosi * cosi);
+
+	return k < 0 ? Vec3f{ 1, 0, 0 } : I * eta + N * (eta*cosi - sqrtf(k));
 }

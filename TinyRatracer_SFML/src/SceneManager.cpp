@@ -6,14 +6,31 @@ SceneManager::SceneManager()
 {
 }
 
+SceneManager::~SceneManager()
+{
+	for (ModelBase* mb : objects)
+	{
+		delete mb;
+	}
+	for (Light* l : lights)
+	{
+		delete l;
+	}
+}
+
 void SceneManager::AddSphere(const Sphere & sphere)
 {
-	objects.emplace_back(sphere);
+	objects.emplace_back(new Sphere{ sphere });
+}
+
+void SceneManager::AddObjModel(const std::string& name, const char* filepath, const Material& m)
+{
+	objects.emplace_back(new ObjModel{ name, filepath, m });
 }
 
 void SceneManager::AddLight(const Light & light)
 {
-	lights.emplace_back(light);
+	lights.emplace_back(new Light{ light });
 }
 
 void SceneManager::AddEnvironmentMap(const std::string & imgFilename)
@@ -47,10 +64,10 @@ bool SceneManager::EditScene()
 	bool isEdited = false;
 	for (size_t i = 0; i < objects.size(); i++)
 	{
-		std::string label = "Sphere" + std::to_string(i);
+		std::string label = objects[i]->GetName();
 		if (ImGui::TreeNode(label.c_str()))
 		{
-			isEdited |= objects[i].EditSphere();
+			isEdited |= objects[i]->EditModel();
 			ImGui::TreePop();
 		}
 	}
@@ -60,7 +77,7 @@ bool SceneManager::EditScene()
 		std::string label = "Light" + std::to_string(i);
 		if (ImGui::TreeNode(label.c_str()))
 		{
-			isEdited |= lights[i].EditLight();
+			isEdited |= lights[i]->EditLight();
 			ImGui::TreePop();
 		}
 	}

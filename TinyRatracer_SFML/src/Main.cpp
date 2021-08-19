@@ -18,11 +18,13 @@ int main()
 
 	SceneManager* scene = new SceneManager;
 
-	// Add sphere objects in scene
-	scene->AddSphere({ Vec3f(-3.0f, 0.0f, 0.0f), 2.0f, shinyIvoryMaterial });
-	scene->AddSphere({ Vec3f(-1.0f,-1.5f, 4.0f), 2.0f, glassMaterial });
-	scene->AddSphere({ Vec3f(1.5f,-0.5f, -2.0f), 3.0f, dullRedMaterial });
-	scene->AddSphere({ Vec3f(7.0f, 5.0f, -2.0f), 4.0f, mirrorMaterial });
+	// Add objects in scene
+	scene->AddSphere({ std::string{ "Sphere 1" }, Vec3f(-3.0f, 0.0f, 0.0f), 2.0f, shinyIvoryMaterial });
+	scene->AddSphere({ std::string{ "Sphere 2" },Vec3f(-1.0f,-1.5f, 4.0f), 2.0f, glassMaterial });
+	scene->AddSphere({ std::string{ "Sphere 3" },Vec3f(1.5f,-0.5f, -2.0f), 3.0f, dullRedMaterial });
+	scene->AddSphere({ std::string{ "Sphere 4" },Vec3f(7.0f, 5.0f, -2.0f), 4.0f, mirrorMaterial });
+
+	scene->AddObjModel(std::string{ "Duck" }, "resources/duck.obj", glassMaterial);
 
 	// Add lights in scene
 	scene->AddLight({ Vec3f(-20.0f, 20.0f, 20.0f), 1.5f });
