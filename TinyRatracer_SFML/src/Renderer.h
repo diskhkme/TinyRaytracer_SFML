@@ -18,7 +18,7 @@ private:
 	size_t maxDepth;
 
 	// Scene
-	SceneManager mScene;
+	SceneManager* mScene;
 
 	// Camera
 	Vec3f mOrbitCameraParameter; // (x,y,z) => (r, yaw, pitch)
@@ -33,7 +33,7 @@ public:
 	sf::Int32 Render(std::vector<Vec3f>& frameBuffer, bool isPreview) const;
 
 	bool EditorGUI();
-	void SetScene(const SceneManager& scene);
+	void SetScene(SceneManager* const scene);
 	
 private:
 	Vec3f CastRay(const Vec3f& origin, const Vec3f& direction, size_t currentDepth) const;

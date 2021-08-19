@@ -59,7 +59,7 @@ void Window::Run()
 	}
 }
 
-void Window::SetScene(const SceneManager & scene)
+void Window::SetScene(SceneManager* const scene)
 {
 	mRenderer.SetScene(scene);
 }

@@ -62,7 +62,7 @@ bool Renderer::EditorGUI()
 	ImGui::Begin("Edit Scene");
 	ImGui::Text("if values changed, preview screen will be shown");
 	ImGui::Text("after changing the values, press render button again");
-	bool e1 = mScene.EditScene();
+	bool e1 = mScene->EditScene();
 	ImGui::End();
 
 	//---edit Camera
@@ -76,7 +76,7 @@ bool Renderer::EditorGUI()
 	return e1 | e2;
 }
 
-void Renderer::SetScene(const SceneManager & scene)
+void Renderer::SetScene(SceneManager* const scene)
 {
 	mScene = scene;
 }
@@ -101,7 +101,8 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, size_t cu
 
 	if (currentDepth > maxDepth || !SceneIntersect(origin, direction, hit, normal, material))
 	{
-		return Vec3f{ 0.2f, 0.7f, 0.8f };
+		//교차하는 물체가 없으면 direction으로부터 env map의 픽셀 정보를 얻어옴
+		return mScene->GetEnvironmentColor(direction);
 	}
 	// 교차하는 물체가 있는경우 hit,normal,material 정보가 저장됨
 
@@ -118,7 +119,7 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, size_t cu
 	float diffuseIntensity = 0;
 	float specularIntensity = 0;
 
-	for (const Light& light : mScene.GetLights())
+	for (const Light& light : mScene->GetLights())
 	{
 		Vec3f lightDir = (light.GetPosition() - hit).normalize();
 		float lightDist = (light.GetPosition() - hit).norm();
@@ -157,7 +158,7 @@ bool Renderer::SceneIntersect(const Vec3f & origin, const Vec3f direction,
 
 	Vec3f fillColor{};
 	bool filled = false;
-	for (const Sphere& s : mScene.GetObjects())
+	for (const Sphere& s : mScene->GetObjects())
 	{
 		if (s.RayIntersect(origin, direction, sphereDist))
 		{

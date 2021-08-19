@@ -15,7 +15,7 @@ public:
 			unsigned int previewWidth, unsigned int previewHeight);
 	~Window();
 	void Run();
-	void SetScene(const SceneManager& scene);
+	void SetScene(SceneManager* const scene);
 
 private:
 	void SetRenderGUI();
