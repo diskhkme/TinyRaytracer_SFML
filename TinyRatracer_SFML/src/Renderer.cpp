@@ -13,8 +13,7 @@ Renderer::Renderer(unsigned int w, unsigned int h, float fov,
 	UpdateCamera();
 }
 
-sf::Int32 Renderer::Render(std::vector<Vec3f>& frameBuffer, const std::vector<Sphere> & scene, 
-	const std::vector<Light>& lights, bool isPreview) const
+sf::Int32 Renderer::Render(std::vector<Vec3f>& frameBuffer, bool isPreview) const
 {
 	// 현재는 Scene에 Sphere 하나만 있다고 가정
 	unsigned int renderW = 0;
@@ -37,7 +36,7 @@ sf::Int32 Renderer::Render(std::vector<Vec3f>& frameBuffer, const std::vector<Sp
 			float x = (2 * (i + 0.5f) / (float)renderW - 1) * tan(fov / 2.0f)*renderW / (float)renderH;
 			float y = -(2 * (j + 0.5f) / (float)renderH - 1) * tan(fov / 2.0f);
 			Vec3f dir = ((mCameraRight * x) + (mCameraUp * y) + mCameraForward).normalize();
-			frameBuffer[i + j * renderW] = CastRay(mCameraPosition, dir, scene, lights); //카메라는 mCameraPosition에 위치
+			frameBuffer[i + j * renderW] = CastRay(mCameraPosition, dir); //카메라는 mCameraPosition에 위치
 		}
 	}
 	sf::Int32 elapsedTime = clock.getElapsedTime().asMilliseconds();
@@ -57,6 +56,30 @@ bool Renderer::EditCamera()
 	return e1 | e2 | e3;
 }
 
+bool Renderer::EditorGUI()
+{
+	//---edit scene & light
+	ImGui::Begin("Edit Scene");
+	ImGui::Text("if values changed, preview screen will be shown");
+	ImGui::Text("after changing the values, press render button again");
+	bool e1 = mScene.EditScene();
+	ImGui::End();
+
+	//---edit Camera
+	ImGui::Begin("Edit Camera");
+	ImGui::Text("if values changed, preview screen will be shown");
+	ImGui::Text("after changing the values, press render button again");
+	bool e2 = EditCamera();
+	ImGui::End();
+
+	return e1 | e2;
+}
+
+void Renderer::SetScene(const SceneManager & scene)
+{
+	mScene = scene;
+}
+
 void Renderer::UpdateCamera()
 {
 	mCameraForward.x = cosf(mOrbitCameraParameter.y) * cosf(mOrbitCameraParameter.z);
@@ -70,13 +93,12 @@ void Renderer::UpdateCamera()
 	mCameraUp = cross(mCameraRight, mCameraForward).normalize();
 }
 
-Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, const std::vector<Sphere> & scene, 
-	const std::vector<Light>& lights) const
+Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction) const
 {
 	Vec3f hit, normal;
 	Material material;
 
-	if (!SceneIntersect(origin, direction, scene, hit, normal, material))
+	if (!SceneIntersect(origin, direction, hit, normal, material))
 	{
 		return Vec3f{ 0.2f, 0.7f, 0.8f };
 	}
@@ -85,7 +107,7 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, const std
 	float diffuseIntensity = 0;
 	float specularIntensity = 0;
 
-	for (const Light& light : lights)
+	for (const Light& light : mScene.GetLights())
 	{
 		Vec3f lightDir = (light.GetPosition() - hit).normalize();
 
@@ -101,14 +123,14 @@ Vec3f Renderer::CastRay(const Vec3f & origin, const Vec3f & direction, const std
 	return color;
 }
 
-bool Renderer::SceneIntersect(const Vec3f & origin, const Vec3f direction, const std::vector<Sphere>& scene,
+bool Renderer::SceneIntersect(const Vec3f & origin, const Vec3f direction, 
 	Vec3f & hit, Vec3f & normal, Material & material) const
 {
 	float sphereDist = std::numeric_limits<float>::max();
 
 	Vec3f fillColor{};
 	bool filled = false;
-	for (const Sphere& s : scene)
+	for (const Sphere& s : mScene.GetObjects())
 	{
 		if (s.RayIntersect(origin, direction, sphereDist))
 		{

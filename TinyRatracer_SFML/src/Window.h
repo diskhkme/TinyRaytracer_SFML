@@ -6,6 +6,7 @@
 #include "../imgui-sfml/imgui-SFML.h"
 
 #include "Renderer.h"
+#include "SceneManager.h"
 
 class Window : public sf::NonCopyable
 {
@@ -14,8 +15,7 @@ public:
 			unsigned int previewWidth, unsigned int previewHeight);
 	~Window();
 	void Run();
-	void AddSphere(const Sphere& s);
-	void AddLight(const Light& l);
+	void SetScene(const SceneManager& scene);
 
 private:
 	void SetRenderGUI();
@@ -25,24 +25,22 @@ private:
 private:
 	sf::RenderWindow mWindow;
 
+	// Render Managing
 	Renderer mRenderer;
-	// Renderer outputs
+	sf::Int32 renderTime = 0;
+	sf::Int32 updateTime = 0;
+	bool bPreviewOn = true;
+
+	// Render output
 	sf::Sprite mDisplaySprite;
 	sf::Texture mTexture;
 	std::vector<Vec3f> mFramebuffer;
 	sf::Uint8* mPixels;
-	// Preview
+
+	// Preview output
 	sf::Texture mPreviewTexture; 
 	std::vector<Vec3f> mPreviewFramebuffer; 
 	sf::Uint8* mPreviewPixels;
 
-	sf::Int32 renderTime = 0;
-	sf::Int32 updateTime = 0;
 
-	bool bPreviewOn = true;
-	
-	// Scene, composed of multiple spheres
-	std::vector<Sphere> mScene;
-	std::vector<Light> mLights;
-	
 };

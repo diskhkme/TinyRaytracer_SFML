@@ -7,8 +7,7 @@ Window::Window(unsigned int width, unsigned int height, float fov,
 	mRenderer{ width, height, fov, previewWidth, previewHeight },
 	mDisplaySprite{},
 	mFramebuffer{ width*height }, mTexture{},
-	mPreviewFramebuffer{ previewWidth*previewHeight }, mPreviewTexture{},
-	mScene{}, mLights{}
+	mPreviewFramebuffer{ previewWidth*previewHeight }, mPreviewTexture{}
 {
 	assert(mTexture.create(width, height));
 	assert(mPreviewTexture.create(previewWidth, previewHeight));
@@ -60,14 +59,9 @@ void Window::Run()
 	}
 }
 
-void Window::AddSphere(const Sphere & s)
+void Window::SetScene(const SceneManager & scene)
 {
-	mScene.emplace_back(s);
-}
-
-void Window::AddLight(const Light & l)
-{
-	mLights.emplace_back(l);
+	mRenderer.SetScene(scene);
 }
 
 void Window::SetRenderGUI()
@@ -86,42 +80,10 @@ void Window::SetRenderGUI()
 
 void Window::SetEditorGUI()
 {
-	//---edit scene & light
-	ImGui::Begin("Edit Scene");
-	ImGui::Text("if values changed, preview screen will be shown");
-	ImGui::Text("after changing the values, press render button again");
-	for (size_t i = 0; i < mScene.size(); i++)
-	{
-		std::string label = "Sphere" + std::to_string(i);
-		if (ImGui::TreeNode(label.c_str()))
-		{
-			bPreviewOn |= mScene[i].EditSphere();
-			ImGui::TreePop();
-		}
-	}
-	ImGui::Separator();
-	for (size_t i = 0; i < mLights.size(); i++)
-	{
-		std::string label = "Light" + std::to_string(i);
-		if (ImGui::TreeNode(label.c_str()))
-		{
-			bPreviewOn |= mLights[i].EditLight();
-			ImGui::TreePop();
-		}
-	}
-	ImGui::End();
-
-	//---edit Camera
-	ImGui::Begin("Edit Camera");
-	ImGui::Text("if values changed, preview screen will be shown");
-	ImGui::Text("after changing the values, press render button again");
-	if (mRenderer.EditCamera())
+	if (mRenderer.EditorGUI())
 	{
 		bPreviewOn = true;
 	}
-	ImGui::End();
-
-	
 }
 
 void Window::RenderImage()
@@ -129,7 +91,7 @@ void Window::RenderImage()
 	if (bPreviewOn)
 	{
 		// No time calculation for preview
-		mRenderer.Render(mPreviewFramebuffer, mScene, mLights, bPreviewOn);
+		mRenderer.Render(mPreviewFramebuffer, bPreviewOn);
 		Utility::ConvertPixelsFromVector(mPreviewFramebuffer, mPreviewPixels);
 		mPreviewTexture.update(mPreviewPixels);
 
@@ -140,7 +102,7 @@ void Window::RenderImage()
 	}
 	else
 	{
-		renderTime = mRenderer.Render(mFramebuffer, mScene, mLights, bPreviewOn);
+		renderTime = mRenderer.Render(mFramebuffer, bPreviewOn);
 		sf::Clock clock;
 		Utility::ConvertPixelsFromVector(mFramebuffer, mPixels);
 		mTexture.update(mPixels);

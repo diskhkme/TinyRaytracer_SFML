@@ -42,8 +42,8 @@ public:
 	bool EditSphere()
 	{
 		bool e1 = material.EditMaterial();
-		bool e2 = ImGui::DragFloat3("sphere position", &this->center.x);
-		bool e3 = ImGui::SliderFloat("sphere radius", &this->radius,0.1f, 10.0f);
+		bool e2 = ImGui::DragFloat3("sphere position", &this->center.x, 0.1f);
+		bool e3 = ImGui::SliderFloat("sphere radius", &this->radius, 0.1f, 10.0f);
 		return e1 | e2 | e3;
 	}
 	

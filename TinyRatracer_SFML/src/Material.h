@@ -32,7 +32,7 @@ public:
 	bool EditMaterial()
 	{
 		bool e1 = ImGui::DragFloat2("albedo", &this->albedo.x, 0.01f, 0.0f, 1.0f);
-		bool e2 = ImGui::DragFloat3("color(diffuse)", &this->diffuseColor.x, 0.01f, 0.0f, 1.0f);
+		bool e2 = ImGui::ColorEdit3("color(diffuse)", &this->diffuseColor.x);
 		bool e3 = ImGui::SliderFloat("specular exponent", &this->specularExponent, 1.0f, 1000.0f);
 		return e1 | e2 | e3;
 	}
