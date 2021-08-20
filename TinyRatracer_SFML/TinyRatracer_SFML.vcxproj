@@ -26,6 +26,7 @@
     <ClCompile Include="imgui-sfml\imgui_tables.cpp" />
     <ClCompile Include="imgui-sfml\imgui_widgets.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Scene\Camera.cpp" />
     <ClCompile Include="src\Scene\ObjModel.cpp" />
     <ClCompile Include="src\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Scene\SceneManager.cpp" />
@@ -42,6 +43,7 @@
     <ClInclude Include="src\Renderer\Hit.h" />
     <ClInclude Include="src\Renderer\Ray.h" />
     <ClInclude Include="src\Renderer\RenderOption.h" />
+    <ClInclude Include="src\Scene\Camera.h" />
     <ClInclude Include="src\Scene\Light.h" />
     <ClInclude Include="src\Scene\Material.h" />
     <ClInclude Include="src\Scene\ModelBase.h" />

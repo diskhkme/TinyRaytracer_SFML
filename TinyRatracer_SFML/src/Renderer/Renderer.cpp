@@ -3,14 +3,11 @@
 
 #include <algorithm>
 
-Renderer::Renderer(unsigned int w, unsigned int h, float fov, size_t maxDepth,
+Renderer::Renderer(unsigned int w, unsigned int h, size_t maxDepth,
 	unsigned int previewWidth, unsigned int previewHeight)
-	:width{ w }, height{ h }, fov{ fov }, maxDepth{ maxDepth }, currentMaxDepth{maxDepth},
-	previewHeight{previewHeight}, previewWidth { previewWidth },
-	mOrbitCameraParameter{15.0f,Utility::Deg2Rad(-90.0f),0.0f},
-	mCameraForward{0.0f,0.0f,-1.0f}
+	:width{ w }, height{ h }, maxDepth{ maxDepth }, currentMaxDepth{maxDepth},
+	previewHeight{previewHeight}, previewWidth { previewWidth }
 {
-	UpdateCamera();
 }
 
 sf::Int32 Renderer::Render(std::vector<Vec3f>& frameBuffer, bool isPreview) const
@@ -32,29 +29,12 @@ sf::Int32 Renderer::Render(std::vector<Vec3f>& frameBuffer, bool isPreview) cons
 	sf::Clock clock;
 	for (size_t j = 0; j < renderH; j++) {
 		for (size_t i = 0; i < renderW; i++) {
-			frameBuffer[i + j * renderW] = Vec3f(j / float(renderH), i / float(renderW), 0);
-			float x = (2 * (i + 0.5f) / (float)renderW - 1) * tan(fov / 2.0f)*renderW / (float)renderH;
-			float y = -(2 * (j + 0.5f) / (float)renderH - 1) * tan(fov / 2.0f);
-			Vec3f dir = ((mCameraRight * x) + (mCameraUp * y) + mCameraForward).normalize();
-			Ray ray{ mCameraPosition, dir };
+			Ray ray = mScene->GetCamera().GetRay(i, j, renderW, renderH);
 			frameBuffer[i + j * renderW] = CastRay(ray, isPreview, 0); //Depth 0부터 시작
 		}
 	}
 	sf::Int32 elapsedTime = clock.getElapsedTime().asMilliseconds();
 	return elapsedTime;
-}
-
-bool Renderer::EditCamera()
-{
-	bool e1 = ImGui::DragFloat("Camera r", &this->mOrbitCameraParameter.x, 0.01f, 0.0f, 25.0f);
-	//ImGui::SameLine();
-	bool e2 = ImGui::DragFloat("Camera yaw (rad)", &this->mOrbitCameraParameter.y, 0.01f, Utility::Deg2Rad(-180.0f), Utility::Deg2Rad(180.0f));
-	bool e3 = ImGui::DragFloat("Camera pitch (rad)", &this->mOrbitCameraParameter.z, 0.01f, Utility::Deg2Rad(-89.0f), Utility::Deg2Rad(89.0f));
-	bool e4 = ImGui::DragFloat("Camera FOV", &this->fov, 0.01f, Utility::Deg2Rad(10.0f), Utility::Deg2Rad(150.0f));
-	
-	UpdateCamera();
-
-	return e1 | e2 | e3;
 }
 
 bool Renderer::EditorGUI()
@@ -70,7 +50,7 @@ bool Renderer::EditorGUI()
 	ImGui::Begin("Edit Camera");
 	ImGui::Text("if values changed, preview screen will be shown");
 	ImGui::Text("after changing the values, press render button again");
-	bool e2 = EditCamera();
+	bool e2 = mScene->GetCamera().EditCamera();
 	ImGui::DragInt("Max Depth", (int*)&maxDepth, 1.0f, 0, 10);
 	ImGui::End();
 
@@ -80,19 +60,6 @@ bool Renderer::EditorGUI()
 void Renderer::SetScene(SceneManager* const scene)
 {
 	mScene = scene;
-}
-
-void Renderer::UpdateCamera()
-{
-	mCameraForward.x = cosf(mOrbitCameraParameter.y) * cosf(mOrbitCameraParameter.z);
-	mCameraForward.y = sinf(mOrbitCameraParameter.z);
-	mCameraForward.z = sinf(mOrbitCameraParameter.y) * cosf(mOrbitCameraParameter.z);
-	mCameraForward = mCameraForward.normalize();
-
-	mCameraPosition = -mOrbitCameraParameter.x * mCameraForward;
-
-	mCameraRight = cross(mCameraForward, Vec3f{ 0.0f,1.0f,0.0f }).normalize();
-	mCameraUp = cross(mCameraRight, mCameraForward).normalize();
 }
 
 Vec3f Renderer::CastRay(const Ray& ray, bool isPreview, size_t currentDepth) const

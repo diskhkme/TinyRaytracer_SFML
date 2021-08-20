@@ -42,6 +42,16 @@ void SceneManager::AddEnvironmentMap(const std::string & imgFilename)
 	}
 }
 
+void SceneManager::SetCamera(const Camera & camera)
+{
+	this->camera = camera;
+}
+
+Camera & SceneManager::GetCamera()
+{
+	return camera;
+}
+
 Vec3f SceneManager::GetEnvironmentColor(const Vec3f & direction) const
 {
 	float theta = acos(direction.y);

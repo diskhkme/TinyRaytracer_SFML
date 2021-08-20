@@ -11,7 +11,7 @@
 class Window : public sf::NonCopyable
 {
 public:
-	Window(unsigned int width, unsigned int height, float fov, size_t maxDepth,
+	Window(unsigned int width, unsigned int height, size_t maxDepth,
 			unsigned int previewWidth, unsigned int previewHeight);
 	~Window();
 	void Run();
@@ -41,6 +41,4 @@ private:
 	sf::Texture mPreviewTexture; 
 	std::vector<Vec3f> mPreviewFramebuffer; 
 	sf::Uint8* mPreviewPixels;
-
-
 };

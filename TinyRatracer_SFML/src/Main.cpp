@@ -14,9 +14,11 @@ int main()
 	const Material mirrorMaterial{ Vec4f{0.0f, 10.0f, 0.8f, 0.0f }, Vec3f{1.0f,1.0f,1.0f}, 1425.0f, 1.0f };
 	const Material glassMaterial{ Vec4f{0.0f, 0.5f, 0.1f, 0.8f }, Vec3f{0.6f,0.7f,0.8f}, 125.0f, 1.5f };
 	
-	Window* window = new Window{ WIDTH, HEIGHT, FOV, MAXDEPTH, PREVIEW_WIDTH, PREVIEW_HEIGHT };
+	Window* window = new Window{ WIDTH, HEIGHT, MAXDEPTH, PREVIEW_WIDTH, PREVIEW_HEIGHT };
 
 	SceneManager* scene = new SceneManager;
+
+	scene->SetCamera({ FOV });
 
 	// Add objects in scene
 	scene->AddSphere({ std::string{ "Sphere 1" }, Vec3f(-3.0f, 0.0f, 0.0f), 2.0f, shinyIvoryMaterial });

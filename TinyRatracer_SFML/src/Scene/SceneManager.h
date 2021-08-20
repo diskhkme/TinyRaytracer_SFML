@@ -5,6 +5,7 @@
 #include "Sphere.h"
 #include "ObjModel.h"
 #include "Light.h"
+#include "Camera.h"
 
 #include "../../imgui-sfml/imgui.h"
 #include "../../imgui-sfml/imgui-SFML.h"
@@ -17,6 +18,7 @@ private:
 	std::vector<ModelBase*> objects;
 	std::vector<Light*> lights;
 	sf::Image envMapImg;
+	Camera camera;
 public:
 	SceneManager();
 	~SceneManager();
@@ -24,6 +26,8 @@ public:
 	void AddObjModel(const std::string& name, const char* filepath, const Material& m);
 	void AddLight(const Light& light);
 	void AddEnvironmentMap(const std::string& imgFilename);
+	void SetCamera(const Camera& camera);
+	Camera& GetCamera();
 	Vec3f GetEnvironmentColor(const Vec3f& direction) const;
 
 	bool EditScene();
