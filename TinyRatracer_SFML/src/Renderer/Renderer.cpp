@@ -25,11 +25,15 @@ sf::Int32 Renderer::Render(std::vector<Vec3f>& frameBuffer, bool isPreview) cons
 		renderW = width;
 		renderH = height;
 	}
+	dist_t aspectRatio = static_cast<dist_t>(renderW) / renderH;
 
 	sf::Clock clock;
 	for (size_t j = 0; j < renderH; j++) {
 		for (size_t i = 0; i < renderW; i++) {
-			Ray ray = mScene->GetCamera().GetRay(i, j, renderW, renderH);
+			dist_t u = (2.0f * (static_cast<dist_t>(i) + 0.5f) / renderW) - 1.0f; // [0,1]
+			dist_t v = (2.0f * (static_cast<dist_t>(j) + 0.5f) / renderH) - 1.0f; // [0,1]
+
+			Ray ray = mScene->GetCamera().GetRay(u, v, aspectRatio);
 			frameBuffer[i + j * renderW] = CastRay(ray, isPreview, 0); //Depth 0부터 시작
 		}
 	}

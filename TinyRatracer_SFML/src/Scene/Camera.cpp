@@ -28,10 +28,10 @@ void Camera::UpdateCamera()
 	mCameraUp = cross(mCameraRight, mCameraForward).normalize();
 }
 
-Ray Camera::GetRay(size_t i, size_t j, size_t renderWidth, size_t renderHeight)
+Ray Camera::GetRay(dist_t u, dist_t v, dist_t aspectRatio)
 {
-	float x = (2 * (i + 0.5f) / (float)renderWidth - 1) * tan(mFov / 2.0f)*renderWidth / (float)renderHeight;
-	float y = -(2 * (j + 0.5f) / (float)renderHeight - 1) * tan(mFov / 2.0f);
+	dist_t x = u * tan(mFov / 2.0f)*aspectRatio;
+	dist_t y = -v * tan(mFov / 2.0f);
 	Vec3f dir = ((mCameraRight * x) + (mCameraUp * y) + mCameraForward).normalize();
 	return Ray{ mCameraPosition, dir };
 }

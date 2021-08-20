@@ -22,7 +22,7 @@ public:
 	Camera();
 	Camera(float fov);
 
-	Ray GetRay(size_t i, size_t j, size_t renderWidth, size_t renderHeight);
+	Ray GetRay(dist_t u, dist_t v, dist_t aspectRatio);
 	bool EditCamera();
 	void UpdateCamera();
 };

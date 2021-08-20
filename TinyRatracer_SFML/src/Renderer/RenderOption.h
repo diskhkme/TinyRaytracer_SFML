@@ -8,6 +8,8 @@ typedef double dist_t;
 typedef float dist_t;
 #endif
 
+// TODO : Add precision option regarding vec3
+
 #define EPS 1e-3
 
 
