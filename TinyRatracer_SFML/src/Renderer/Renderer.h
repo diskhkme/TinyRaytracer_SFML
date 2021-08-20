@@ -11,23 +11,27 @@
 class Renderer
 {
 private:
-	// Window
-	const unsigned int width;
-	const unsigned int height;
-	const unsigned int previewWidth;
-	const unsigned int previewHeight;
-	size_t maxDepth;
-	size_t currentMaxDepth;
+	struct RenderParameters
+	{
+		size_t widthResolution;
+		size_t heightResolution;
+		size_t maxDepth;
+		size_t samplesPerPixel;
+	};
+
+	RenderParameters previewRenderParam;
+	RenderParameters targetRenderParam;
+	mutable RenderParameters currentParam;
 
 	// Scene
 	SceneManager* mScene;
 
 public:
-	Renderer(unsigned int w, unsigned int h, size_t maxDepth,
+	Renderer(unsigned int w, unsigned int h, size_t maxDepth, size_t samplesPerPixel,
 			unsigned int previewWidth, unsigned int previewHeight);
 	sf::Int32 Render(std::vector<Vec3f>& frameBuffer, bool isPreview) const;
 
-	bool EditorGUI();
+	bool EditRenderer();
 	void SetScene(SceneManager* const scene);
 	
 private:

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <random>
 
 #include <SFML/Graphics.hpp>
 
@@ -45,5 +46,20 @@ public:
 		color.z = std::min(color.z, 1.0f);
 	}
 
+	static inline dist_t RandomValueZeroOne() {
+		static std::uniform_real_distribution<dist_t> distribution(0.0, 1.0);
+		static std::mt19937 generator;
+		return distribution(generator);
+	}
+
+	template <typename T>
+	static inline T Clamp(T val, T min, T max) {
+		if (val < min)
+			return min;
+		else if (val > max)
+			return max;
+		else
+			return val;
+	}
 };
 

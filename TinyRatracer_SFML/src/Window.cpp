@@ -1,10 +1,10 @@
 #include "Window.h"
 #include "Utility.h"
 
-Window::Window(unsigned int width, unsigned int height, size_t maxDepth,
+Window::Window(unsigned int width, unsigned int height, size_t maxDepth, size_t samplesPerPixel,
 	unsigned int previewWidth, unsigned int previewHeight)
 	: mWindow{ sf::VideoMode{width, height}, "TinyRenderer", sf::Style::Close },
-	mRenderer{ width, height, maxDepth, previewWidth, previewHeight },
+	mRenderer{ width, height, maxDepth, samplesPerPixel, previewWidth, previewHeight },
 	mDisplaySprite{},
 	mFramebuffer{ width*height }, mTexture{},
 	mPreviewFramebuffer{ previewWidth*previewHeight }, mPreviewTexture{}
@@ -80,7 +80,7 @@ void Window::SetRenderGUI()
 
 void Window::SetEditorGUI()
 {
-	if (mRenderer.EditorGUI())
+	if (mRenderer.EditRenderer())
 	{
 		bPreviewOn = true;
 	}

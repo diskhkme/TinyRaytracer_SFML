@@ -11,7 +11,7 @@
 class Window : public sf::NonCopyable
 {
 public:
-	Window(unsigned int width, unsigned int height, size_t maxDepth,
+	Window(unsigned int width, unsigned int height, size_t maxDepth, size_t samplesPerPixel,
 			unsigned int previewWidth, unsigned int previewHeight);
 	~Window();
 	void Run();

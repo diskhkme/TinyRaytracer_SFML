@@ -61,9 +61,9 @@ Vec3f SceneManager::GetEnvironmentColor(const Vec3f & direction) const
 	unsigned int mapSizeY = envMapImg.getSize().y;
 
 	// [-pi:pi] --> [0:1] --> [0:mapsizeY]
-	unsigned int pixelXCoord = static_cast<unsigned int>((((phi / MY_PI) + 1.0f) / 2.0f) * mapSizeX);
+	unsigned int pixelXCoord = static_cast<unsigned int>((((phi / MY_PI) + 1.0f) / 2.0f) * (mapSizeX - 1));
 	// [0:pi] --> [0:1] --> [0:mapsizeX]
-	unsigned int pixelYCoord = static_cast<unsigned int>(((theta / MY_PI)) * mapSizeY);
+	unsigned int pixelYCoord = static_cast<unsigned int>(((theta / MY_PI)) * (mapSizeY - 1));
 
 	sf::Color c = envMapImg.getPixel(pixelXCoord, pixelYCoord);
 	return Vec3f{ c.r / 255.0f, c.g / 255.0f, c.b / 255.0f };

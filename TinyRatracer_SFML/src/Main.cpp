@@ -8,13 +8,14 @@ int main()
 	constexpr unsigned int PREVIEW_HEIGHT = 48;
 	constexpr float FOV = 3.14f / 3.f;
 	size_t MAXDEPTH = 4;
+	size_t SAMPLES_PER_PIXEL = 50;
 
 	const Material shinyIvoryMaterial{ Vec4f{0.6f, 0.3f, 0.1f, 0.0f }, Vec3f{0.4f,0.4f,0.3f}, 50.0f, 1.0f };
 	const Material dullRedMaterial{ Vec4f{0.7f, 0.1f, 0.0f, 0.0f }, Vec3f{0.5f,0.1f,0.1f}, 5.0f, 1.0f };
 	const Material mirrorMaterial{ Vec4f{0.0f, 10.0f, 0.8f, 0.0f }, Vec3f{1.0f,1.0f,1.0f}, 1425.0f, 1.0f };
 	const Material glassMaterial{ Vec4f{0.0f, 0.5f, 0.1f, 0.8f }, Vec3f{0.6f,0.7f,0.8f}, 125.0f, 1.5f };
 	
-	Window* window = new Window{ WIDTH, HEIGHT, MAXDEPTH, PREVIEW_WIDTH, PREVIEW_HEIGHT };
+	Window* window = new Window{ WIDTH, HEIGHT, MAXDEPTH, SAMPLES_PER_PIXEL, PREVIEW_WIDTH, PREVIEW_HEIGHT };
 
 	SceneManager* scene = new SceneManager;
 
@@ -26,7 +27,7 @@ int main()
 	scene->AddSphere({ std::string{ "Sphere 3" },Vec3f(1.5f,-0.5f, -2.0f), 3.0f, dullRedMaterial });
 	scene->AddSphere({ std::string{ "Sphere 4" },Vec3f(7.0f, 5.0f, -2.0f), 4.0f, mirrorMaterial });
 
-	scene->AddObjModel(std::string{ "Duck" }, "resources/duck.obj", glassMaterial);
+	//scene->AddObjModel(std::string{ "Duck" }, "resources/duck.obj", glassMaterial);
 
 	// Add lights in scene
 	scene->AddLight({ Vec3f(-20.0f, 20.0f, 20.0f), 1.5f });

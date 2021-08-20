@@ -3,45 +3,48 @@
 
 #include <algorithm>
 
-Renderer::Renderer(unsigned int w, unsigned int h, size_t maxDepth,
+Renderer::Renderer(unsigned int w, unsigned int h, size_t maxDepth, size_t samplesPerPixel,
 	unsigned int previewWidth, unsigned int previewHeight)
-	:width{ w }, height{ h }, maxDepth{ maxDepth }, currentMaxDepth{maxDepth},
-	previewHeight{previewHeight}, previewWidth { previewWidth }
+	: previewRenderParam{previewWidth, previewHeight, 1, 1},
+	targetRenderParam{w, h, maxDepth, samplesPerPixel}
 {
 }
 
 sf::Int32 Renderer::Render(std::vector<Vec3f>& frameBuffer, bool isPreview) const
 {
-	// 현재는 Scene에 Sphere 하나만 있다고 가정
-	unsigned int renderW = 0;
-	unsigned int renderH = 0;
 	if (isPreview)
 	{
-		renderW = previewWidth;
-		renderH = previewHeight;
+		currentParam = previewRenderParam;
 	}
 	else
 	{
-		renderW = width;
-		renderH = height;
+		currentParam = targetRenderParam;
 	}
-	dist_t aspectRatio = static_cast<dist_t>(renderW) / renderH;
+	dist_t aspectRatio = static_cast<dist_t>(currentParam.widthResolution) / currentParam.heightResolution;
 
 	sf::Clock clock;
-	for (size_t j = 0; j < renderH; j++) {
-		for (size_t i = 0; i < renderW; i++) {
-			dist_t u = (2.0f * (static_cast<dist_t>(i) + 0.5f) / renderW) - 1.0f; // [0,1]
-			dist_t v = (2.0f * (static_cast<dist_t>(j) + 0.5f) / renderH) - 1.0f; // [0,1]
+	for (size_t j = 0; j < currentParam.heightResolution; j++) {
+		for (size_t i = 0; i < currentParam.widthResolution; i++) {
+			Vec3f color;
+			for (size_t sample = 0; sample < currentParam.samplesPerPixel; sample++)
+			{
+				dist_t w = static_cast<dist_t>(i) + Utility::RandomValueZeroOne();
+				dist_t h = static_cast<dist_t>(j) + Utility::RandomValueZeroOne();
+				dist_t u = (2.0f * (w + 0.5f) / currentParam.widthResolution) - 1.0f;
+				dist_t v = (2.0f * (h + 0.5f) / currentParam.heightResolution) - 1.0f;
 
-			Ray ray = mScene->GetCamera().GetRay(u, v, aspectRatio);
-			frameBuffer[i + j * renderW] = CastRay(ray, isPreview, 0); //Depth 0부터 시작
+				Ray ray = mScene->GetCamera().GetRay(u, v, aspectRatio);
+				color = color + CastRay(ray, isPreview, 0);
+			}
+
+			frameBuffer[i + j * currentParam.widthResolution] = color * (1.0f / currentParam.samplesPerPixel);
 		}
 	}
 	sf::Int32 elapsedTime = clock.getElapsedTime().asMilliseconds();
 	return elapsedTime;
 }
 
-bool Renderer::EditorGUI()
+bool Renderer::EditRenderer()
 {
 	//---edit scene & light
 	ImGui::Begin("Edit Scene");
@@ -55,7 +58,11 @@ bool Renderer::EditorGUI()
 	ImGui::Text("if values changed, preview screen will be shown");
 	ImGui::Text("after changing the values, press render button again");
 	bool e2 = mScene->GetCamera().EditCamera();
-	ImGui::DragInt("Max Depth", (int*)&maxDepth, 1.0f, 0, 10);
+	ImGui::End();
+
+	ImGui::Begin("Render Options");
+	ImGui::DragInt("Maximum depth", (int*)&targetRenderParam.maxDepth, 1.0f, 1, 100);
+	ImGui::DragInt("Samples per pixel", (int*)&targetRenderParam.samplesPerPixel, 1.0f, 1, 100);
 	ImGui::End();
 
 	return e1 | e2;
@@ -69,22 +76,10 @@ void Renderer::SetScene(SceneManager* const scene)
 Vec3f Renderer::CastRay(const Ray& ray, bool isPreview, size_t currentDepth) const
 {
 	Hit hit;
-
-	if (isPreview)
+	if (currentDepth > currentParam.maxDepth || !SceneIntersect(ray, hit))
 	{
-		if (currentDepth > 1 || !SceneIntersect(ray, hit))
-		{
-			return mScene->GetEnvironmentColor(ray.direction);
-		}
+		return mScene->GetEnvironmentColor(ray.direction);
 	}
-	else
-	{
-		if (currentDepth > maxDepth || !SceneIntersect(ray, hit))
-		{
-			return mScene->GetEnvironmentColor(ray.direction);
-		}
-	}
-	
 
 	//---Reflection
 	Vec3f reflectDir = Reflect(ray.direction, hit.normal).normalize();
